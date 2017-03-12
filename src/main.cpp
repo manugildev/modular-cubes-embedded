@@ -78,4 +78,18 @@ void loop() {
 
   Serial.println(json);
   Serial.println("closing connection");
+
+  //Testing HTTPClient
+  HTTPClient http;
+  http.begin("http://jsonplaceholder.typicode.com/users/1");
+  http.addHeader("Content-Type", "text/plain");
+  int httpCode = http.GET();
+
+  Serial.println("HTTP response code: ");
+  Serial.println(httpCode);
+
+  String payload = http.getString();
+  Serial.println(payload);
+
+  http.end();
 }
