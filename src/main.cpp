@@ -2,14 +2,15 @@
 #include <Wire.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
-#include <FirebaseArduino.h>
+#include <UniversalTelegramBot.h>
 
 // Custom
 #include <Server.h>
 #include <Configuration.h>
 
-const char* host = "jsonplaceholder.typicode.com";
-
+#define BotToken "XXXXXXXXXXXXXXXXXXXXX"
+WiFiClientSecure secured_client;
+UniversalTelegramBot bot(BotToken, secured_client);
 
 void setup() {
   Serial.begin(9600);
@@ -28,10 +29,11 @@ void setup() {
 
 
 }
-WiFiClient client;
 
 void loop() {
   delay(5000);
+
+  bot.sendMessage("chat_id", "Test Message from ESP8266", "Markdown");
 
   // HTTPClient
   HTTPClient http;
@@ -39,11 +41,12 @@ void loop() {
   http.addHeader("Content-Type", "text/plain");
   int httpCode = http.GET();
 
-  Serial.println("HTTP response code: ");
+  Serial.print("HTTP response code: ");
   Serial.println(httpCode);
 
   String payload = http.getString();
   Serial.println(payload);
 
   http.end();
+
 }
