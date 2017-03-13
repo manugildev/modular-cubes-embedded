@@ -20,14 +20,14 @@ namespace ArduinoJson {
 
 template <typename TStringRef>
 class JsonObjectSubscript
-    : public JsonVariantBase<JsonObjectSubscript<TStringRef> > {
+    : public JsonVariantBase<JsonObjectSubscript<TStringRef>> {
   typedef JsonObjectSubscript<TStringRef> this_type;
 
- public:
-  FORCE_INLINE JsonObjectSubscript(JsonObject& object, TStringRef key)
+public:
+  FORCE_INLINE JsonObjectSubscript(JsonObject &object, TStringRef key)
       : _object(object), _key(key) {}
 
-  FORCE_INLINE this_type& operator=(const this_type& src) {
+  FORCE_INLINE this_type &operator=(const this_type &src) {
     _object.set(_key, src);
     return *this;
   }
@@ -41,8 +41,8 @@ class JsonObjectSubscript
   template <typename TValue>
   FORCE_INLINE
       typename TypeTraits::EnableIf<!TypeTraits::IsArray<TValue>::value,
-                                    this_type&>::type
-      operator=(const TValue& src) {
+                                    this_type &>::type
+      operator=(const TValue &src) {
     _object.set(_key, src);
     return *this;
   }
@@ -50,22 +50,19 @@ class JsonObjectSubscript
   // operator=(TValue);
   // TValue = const char*, const char[N], const FlashStringHelper*
   template <typename TValue>
-  FORCE_INLINE this_type& operator=(const TValue* src) {
+  FORCE_INLINE this_type &operator=(const TValue *src) {
     _object.set(_key, src);
     return *this;
   }
 
-  FORCE_INLINE bool success() const {
-    return _object.containsKey(_key);
-  }
+  FORCE_INLINE bool success() const { return _object.containsKey(_key); }
 
   template <typename TValue>
   FORCE_INLINE typename Internals::JsonVariantAs<TValue>::type as() const {
     return _object.get<TValue>(_key);
   }
 
-  template <typename TValue>
-  FORCE_INLINE bool is() const {
+  template <typename TValue> FORCE_INLINE bool is() const {
     return _object.is<TValue>(_key);
   }
 
@@ -79,37 +76,36 @@ class JsonObjectSubscript
   FORCE_INLINE
       typename TypeTraits::EnableIf<!TypeTraits::IsArray<TValue>::value,
                                     bool>::type
-      set(const TValue& value) {
+      set(const TValue &value) {
     return _object.set(_key, value);
   }
   //
   // bool set(TValue);
   // TValue = const char*, const char[N], const FlashStringHelper*
-  template <typename TValue>
-  FORCE_INLINE bool set(const TValue* value) {
+  template <typename TValue> FORCE_INLINE bool set(const TValue *value) {
     return _object.set(_key, value);
   }
   //
   // bool set(TValue, uint8_t decimals);
   // TValue = float, double
   template <typename TValue>
-  FORCE_INLINE bool set(const TValue& value, uint8_t decimals) {
+  FORCE_INLINE bool set(const TValue &value, uint8_t decimals) {
     return _object.set(_key, value, decimals);
   }
 
- private:
-  JsonObject& _object;
+private:
+  JsonObject &_object;
   TStringRef _key;
 };
 
 #if ARDUINOJSON_ENABLE_STD_STREAM
 template <typename TStringRef>
-inline std::ostream& operator<<(std::ostream& os,
-                                const JsonObjectSubscript<TStringRef>& source) {
+inline std::ostream &operator<<(std::ostream &os,
+                                const JsonObjectSubscript<TStringRef> &source) {
   return source.printTo(os);
 }
 #endif
-}  // namespace ArduinoJson
+} // namespace ArduinoJson
 
 #ifdef _MSC_VER
 #pragma warning(pop)

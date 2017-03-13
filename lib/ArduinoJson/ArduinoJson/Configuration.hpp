@@ -12,7 +12,7 @@
 #define ARDUINOJSON_ENABLE_DEPRECATED 1
 #endif
 
-#ifdef ARDUINO  // assume this is an embedded platform
+#ifdef ARDUINO // assume this is an embedded platform
 
 // store using float instead of double to reduce the memory usage (issue #134)
 #ifndef ARDUINOJSON_USE_DOUBLE
@@ -70,7 +70,7 @@
 #define ARDUINOJSON_DEFAULT_NESTING_LIMIT 10
 #endif
 
-#else  // assume this is a computer
+#else // assume this is a computer
 
 // on a computer we have plenty of memory so we can use doubles
 #ifndef ARDUINOJSON_USE_DOUBLE

@@ -13,7 +13,7 @@ namespace ArduinoJson {
 
 // A key value pair for JsonObject.
 struct JsonPair {
-  const char* key;
+  const char *key;
   JsonVariant value;
 };
 }

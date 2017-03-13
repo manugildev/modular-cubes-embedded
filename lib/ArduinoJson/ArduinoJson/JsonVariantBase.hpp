@@ -15,56 +15,41 @@ namespace ArduinoJson {
 
 // Forward declarations.
 class JsonArraySubscript;
-template <typename TKey>
-class JsonObjectSubscript;
+template <typename TKey> class JsonObjectSubscript;
 
 template <typename TImpl>
 class JsonVariantBase : public Internals::JsonPrintable<TImpl> {
- public:
+public:
 #if ARDUINOJSON_ENABLE_DEPRECATED
   DEPRECATED("use as<JsonArray>() instead")
-  FORCE_INLINE JsonArray &asArray() const {
-    return as<JsonArray>();
-  }
+  FORCE_INLINE JsonArray &asArray() const { return as<JsonArray>(); }
 
   DEPRECATED("use as<JsonObject>() instead")
-  FORCE_INLINE JsonObject &asObject() const {
-    return as<JsonObject>();
-  }
+  FORCE_INLINE JsonObject &asObject() const { return as<JsonObject>(); }
 
   DEPRECATED("use as<char*>() instead")
-  FORCE_INLINE const char *asString() const {
-    return as<const char *>();
-  }
+  FORCE_INLINE const char *asString() const { return as<const char *>(); }
 #endif
 
   // Gets the variant as an array.
   // Returns a reference to the JsonArray or JsonArray::invalid() if the
   // variant
   // is not an array.
-  FORCE_INLINE operator JsonArray &() const {
-    return as<JsonArray &>();
-  }
+  FORCE_INLINE operator JsonArray &() const { return as<JsonArray &>(); }
 
   // Gets the variant as an object.
   // Returns a reference to the JsonObject or JsonObject::invalid() if the
   // variant is not an object.
-  FORCE_INLINE operator JsonObject &() const {
-    return as<JsonObject &>();
-  }
+  FORCE_INLINE operator JsonObject &() const { return as<JsonObject &>(); }
 
-  template <typename T>
-  FORCE_INLINE operator T() const {
-    return as<T>();
-  }
+  template <typename T> FORCE_INLINE operator T() const { return as<T>(); }
 
   template <typename T>
   FORCE_INLINE const typename Internals::JsonVariantAs<T>::type as() const {
     return impl()->template as<T>();
   }
 
-  template <typename T>
-  FORCE_INLINE bool is() const {
+  template <typename T> FORCE_INLINE bool is() const {
     return impl()->template is<T>();
   }
 
@@ -91,7 +76,7 @@ class JsonVariantBase : public Internals::JsonPrintable<TImpl> {
   template <typename TString>
   FORCE_INLINE typename TypeTraits::EnableIf<
       Internals::StringTraits<TString>::has_equals,
-      const JsonObjectSubscript<const TString &> >::type
+      const JsonObjectSubscript<const TString &>>::type
   operator[](const TString &key) const {
     return as<JsonObject>()[key];
   }
@@ -101,7 +86,7 @@ class JsonVariantBase : public Internals::JsonPrintable<TImpl> {
   template <typename TString>
   FORCE_INLINE typename TypeTraits::EnableIf<
       Internals::StringTraits<TString>::has_equals,
-      JsonObjectSubscript<const TString &> >::type
+      JsonObjectSubscript<const TString &>>::type
   operator[](const TString &key) {
     return as<JsonObject>()[key];
   }
@@ -111,7 +96,7 @@ class JsonVariantBase : public Internals::JsonPrintable<TImpl> {
   template <typename TString>
   FORCE_INLINE typename TypeTraits::EnableIf<
       Internals::StringTraits<const TString *>::has_equals,
-      JsonObjectSubscript<const TString *> >::type
+      JsonObjectSubscript<const TString *>>::type
   operator[](const TString *key) {
     return as<JsonObject>()[key];
   }
@@ -121,19 +106,16 @@ class JsonVariantBase : public Internals::JsonPrintable<TImpl> {
   template <typename TString>
   FORCE_INLINE typename TypeTraits::EnableIf<
       Internals::StringTraits<TString *>::has_equals,
-      const JsonObjectSubscript<const TString *> >::type
+      const JsonObjectSubscript<const TString *>>::type
   operator[](const TString *key) const {
     return as<JsonObject>()[key];
   }
 
- private:
-  const TImpl *impl() const {
-    return static_cast<const TImpl *>(this);
-  }
+private:
+  const TImpl *impl() const { return static_cast<const TImpl *>(this); }
 };
 
 namespace TypeTraits {
-template <typename T>
-struct IsVariant : IsBaseOf<JsonVariantBase<T>, T> {};
+template <typename T> struct IsVariant : IsBaseOf<JsonVariantBase<T>, T> {};
 }
 }

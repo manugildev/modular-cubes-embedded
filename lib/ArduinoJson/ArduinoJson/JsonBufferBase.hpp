@@ -20,9 +20,8 @@
 #endif
 
 namespace ArduinoJson {
-template <typename TDerived>
-class JsonBufferBase : public JsonBuffer {
- public:
+template <typename TDerived> class JsonBufferBase : public JsonBuffer {
+public:
   // Allocates and populate a JsonArray from a JSON string.
   //
   // The First argument is a pointer to the JSON string, the memory must be
@@ -48,16 +47,18 @@ class JsonBufferBase : public JsonBuffer {
   // JsonArray& parseArray(TString);
   // TString = const char*, const char[N], const FlashStringHelper*
   template <typename TString>
-  JsonArray &parseArray(
-      TString *json, uint8_t nestingLimit = ARDUINOJSON_DEFAULT_NESTING_LIMIT) {
+  JsonArray &
+  parseArray(TString *json,
+             uint8_t nestingLimit = ARDUINOJSON_DEFAULT_NESTING_LIMIT) {
     return Internals::makeParser(that(), json, nestingLimit).parseArray();
   }
   //
   // JsonArray& parseArray(TString);
   // TString = std::istream&, Stream&
   template <typename TString>
-  JsonArray &parseArray(
-      TString &json, uint8_t nestingLimit = ARDUINOJSON_DEFAULT_NESTING_LIMIT) {
+  JsonArray &
+  parseArray(TString &json,
+             uint8_t nestingLimit = ARDUINOJSON_DEFAULT_NESTING_LIMIT) {
     return Internals::makeParser(that(), json, nestingLimit).parseArray();
   }
 
@@ -85,16 +86,18 @@ class JsonBufferBase : public JsonBuffer {
   // JsonObject& parseObject(TString);
   // TString = const char*, const char[N], const FlashStringHelper*
   template <typename TString>
-  JsonObject &parseObject(
-      TString *json, uint8_t nestingLimit = ARDUINOJSON_DEFAULT_NESTING_LIMIT) {
+  JsonObject &
+  parseObject(TString *json,
+              uint8_t nestingLimit = ARDUINOJSON_DEFAULT_NESTING_LIMIT) {
     return Internals::makeParser(that(), json, nestingLimit).parseObject();
   }
   //
   // JsonObject& parseObject(TString);
   // TString = std::istream&, Stream&
   template <typename TString>
-  JsonObject &parseObject(
-      TString &json, uint8_t nestingLimit = ARDUINOJSON_DEFAULT_NESTING_LIMIT) {
+  JsonObject &
+  parseObject(TString &json,
+              uint8_t nestingLimit = ARDUINOJSON_DEFAULT_NESTING_LIMIT) {
     return Internals::makeParser(that(), json, nestingLimit).parseObject();
   }
 
@@ -127,10 +130,8 @@ class JsonBufferBase : public JsonBuffer {
     return Internals::makeParser(that(), json, nestingLimit).parseVariant();
   }
 
- private:
-  TDerived *that() {
-    return static_cast<TDerived *>(this);
-  }
+private:
+  TDerived *that() { return static_cast<TDerived *>(this); }
 };
 }
 

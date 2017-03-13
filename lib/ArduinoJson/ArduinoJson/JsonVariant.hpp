@@ -8,7 +8,7 @@
 #pragma once
 
 #include <stddef.h>
-#include <stdint.h>  // for uint8_t
+#include <stdint.h> // for uint8_t
 
 #include "Data/JsonVariantContent.hpp"
 #include "Data/JsonVariantDefault.hpp"
@@ -43,7 +43,7 @@ class JsonVariant : public JsonVariantBase<JsonVariant> {
   friend void Internals::JsonSerializer::serialize(const JsonVariant &,
                                                    JsonWriter &);
 
- public:
+public:
   // Creates an uninitialized JsonVariant
   JsonVariant() : _type(Internals::JSON_UNDEFINED) {}
 
@@ -174,7 +174,8 @@ class JsonVariant : public JsonVariantBase<JsonVariant> {
   typename TypeTraits::EnableIf<Internals::StringTraits<T>::has_append, T>::type
   as() const {
     const char *cstr = variantAsString();
-    if (cstr) return T(cstr);
+    if (cstr)
+      return T(cstr);
     T s;
     printTo(s);
     return s;
@@ -309,15 +310,14 @@ class JsonVariant : public JsonVariantBase<JsonVariant> {
   }
 
   // Returns true if the variant has a value
-  bool success() const {
-    return _type != Internals::JSON_UNDEFINED;
-  }
+  bool success() const { return _type != Internals::JSON_UNDEFINED; }
 
- private:
+private:
   // It's not allowed to store a char
   template <typename T>
-  JsonVariant(T value, typename TypeTraits::EnableIf<
-                           TypeTraits::IsSame<T, char>::value>::type * = 0);
+  JsonVariant(T value,
+              typename TypeTraits::EnableIf<
+                  TypeTraits::IsSame<T, char>::value>::type * = 0);
 
   JsonArray &variantAsArray() const;
   JsonObject &variantAsObject() const;
@@ -328,12 +328,8 @@ class JsonVariant : public JsonVariantBase<JsonVariant> {
   bool isBoolean() const;
   bool isFloat() const;
   bool isInteger() const;
-  bool isArray() const {
-    return _type == Internals::JSON_ARRAY;
-  }
-  bool isObject() const {
-    return _type == Internals::JSON_OBJECT;
-  }
+  bool isArray() const { return _type == Internals::JSON_ARRAY; }
+  bool isObject() const { return _type == Internals::JSON_OBJECT; }
   bool isString() const {
     return _type == Internals::JSON_STRING ||
            (_type == Internals::JSON_UNPARSED && _content.asString &&

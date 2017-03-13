@@ -21,7 +21,7 @@
 
 // Returns the size (in bytes) of an array with n elements.
 // Can be very handy to determine the size of a StaticJsonBuffer.
-#define JSON_ARRAY_SIZE(NUMBER_OF_ELEMENTS) \
+#define JSON_ARRAY_SIZE(NUMBER_OF_ELEMENTS)                                    \
   (sizeof(JsonArray) + (NUMBER_OF_ELEMENTS) * sizeof(JsonArray::node_type))
 
 namespace ArduinoJson {
@@ -41,7 +41,7 @@ class JsonArray : public Internals::JsonPrintable<JsonArray>,
                   public Internals::ReferenceType,
                   public Internals::List<JsonVariant>,
                   public Internals::JsonBufferAllocated {
- public:
+public:
   // Create an empty JsonArray attached to the specified JsonBuffer.
   // You should not call this constructor directly.
   // Instead, use JsonBuffer::createArray() or JsonBuffer::parseArray().
@@ -61,22 +61,20 @@ class JsonArray : public Internals::JsonPrintable<JsonArray>,
   //          const std::string&, const String&,
   //          const JsonArray&, const JsonObject&
   template <typename T>
-  typename TypeTraits::EnableIf<!TypeTraits::IsArray<T>::value, bool>::type add(
-      const T &value) {
+  typename TypeTraits::EnableIf<!TypeTraits::IsArray<T>::value, bool>::type
+  add(const T &value) {
     return add_impl<const T &>(value);
   }
   //
   // bool add(TValue);
   // TValue = const char*, const char[N], const FlashStringHelper*
-  template <typename T>
-  bool add(const T *value) {
+  template <typename T> bool add(const T *value) {
     return add_impl<const T *>(value);
   }
   //
   // bool add(TValue value, uint8_t decimals);
   // TValue = float, double
-  template <typename T>
-  bool add(T value, uint8_t decimals) {
+  template <typename T> bool add(T value, uint8_t decimals) {
     return add_impl<const JsonVariant &>(JsonVariant(value, decimals));
   }
 
@@ -87,15 +85,14 @@ class JsonArray : public Internals::JsonPrintable<JsonArray>,
   //          const std::string&, const String&,
   //          const JsonArray&, const JsonObject&
   template <typename T>
-  typename TypeTraits::EnableIf<!TypeTraits::IsArray<T>::value, bool>::type set(
-      size_t index, const T &value) {
+  typename TypeTraits::EnableIf<!TypeTraits::IsArray<T>::value, bool>::type
+  set(size_t index, const T &value) {
     return set_impl<const T &>(index, value);
   }
   //
   // bool add(size_t index, TValue);
   // TValue = const char*, const char[N], const FlashStringHelper*
-  template <typename T>
-  bool set(size_t index, const T *value) {
+  template <typename T> bool set(size_t index, const T *value) {
     return set_impl<const T *>(index, value);
   }
   //
@@ -117,8 +114,7 @@ class JsonArray : public Internals::JsonPrintable<JsonArray>,
   }
 
   // Check the type of the value at specified index.
-  template <typename T>
-  bool is(size_t index) const {
+  template <typename T> bool is(size_t index) const {
     node_type *node = findNode(index);
     return node ? node->content.is<T>() : false;
   }
@@ -132,9 +128,7 @@ class JsonArray : public Internals::JsonPrintable<JsonArray>,
   JsonObject &createNestedObject();
 
   // Removes element at specified index.
-  void removeAt(size_t index) {
-    removeNode(findNode(index));
-  }
+  void removeAt(size_t index) { removeNode(findNode(index)); }
 
   // Returns a reference an invalid JsonArray.
   // This object is meant to replace a NULL pointer.
@@ -145,14 +139,12 @@ class JsonArray : public Internals::JsonPrintable<JsonArray>,
   }
 
   // Imports a 1D array
-  template <typename T, size_t N>
-  bool copyFrom(T (&array)[N]) {
+  template <typename T, size_t N> bool copyFrom(T (&array)[N]) {
     return copyFrom(array, N);
   }
 
   // Imports a 1D array
-  template <typename T>
-  bool copyFrom(T *array, size_t len) {
+  template <typename T> bool copyFrom(T *array, size_t len) {
     bool ok = true;
     for (size_t i = 0; i < len; i++) {
       ok &= add(array[i]);
@@ -174,14 +166,12 @@ class JsonArray : public Internals::JsonPrintable<JsonArray>,
   }
 
   // Exports a 1D array
-  template <typename T, size_t N>
-  size_t copyTo(T (&array)[N]) const {
+  template <typename T, size_t N> size_t copyTo(T (&array)[N]) const {
     return copyTo(array, N);
   }
 
   // Exports a 1D array
-  template <typename T>
-  size_t copyTo(T *array, size_t len) const {
+  template <typename T> size_t copyTo(T *array, size_t len) const {
     size_t i = 0;
     for (const_iterator it = begin(); it != end() && i < len; ++it)
       array[i++] = *it;
@@ -197,26 +187,27 @@ class JsonArray : public Internals::JsonPrintable<JsonArray>,
     }
   }
 
- private:
+private:
   node_type *findNode(size_t index) const {
     node_type *node = _firstNode;
-    while (node && index--) node = node->next;
+    while (node && index--)
+      node = node->next;
     return node;
   }
 
-  template <typename TValueRef>
-  bool set_impl(size_t index, TValueRef value) {
+  template <typename TValueRef> bool set_impl(size_t index, TValueRef value) {
     node_type *node = findNode(index);
-    if (!node) return false;
+    if (!node)
+      return false;
 
     return Internals::ValueSetter<TValueRef>::set(_buffer, node->content,
                                                   value);
   }
 
-  template <typename TValueRef>
-  bool add_impl(TValueRef value) {
+  template <typename TValueRef> bool add_impl(TValueRef value) {
     node_type *node = addNewNode();
-    if (!node) return false;
+    if (!node)
+      return false;
 
     return Internals::ValueSetter<TValueRef>::set(_buffer, node->content,
                                                   value);
@@ -224,11 +215,8 @@ class JsonArray : public Internals::JsonPrintable<JsonArray>,
 };
 
 namespace Internals {
-template <>
-struct JsonVariantDefault<JsonArray> {
-  static JsonArray &get() {
-    return JsonArray::invalid();
-  }
+template <> struct JsonVariantDefault<JsonArray> {
+  static JsonArray &get() { return JsonArray::invalid(); }
 };
 }
 }

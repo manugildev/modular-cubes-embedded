@@ -17,11 +17,11 @@
 
 namespace ArduinoJson {
 class JsonArraySubscript : public JsonVariantBase<JsonArraySubscript> {
- public:
-  FORCE_INLINE JsonArraySubscript(JsonArray& array, size_t index)
+public:
+  FORCE_INLINE JsonArraySubscript(JsonArray &array, size_t index)
       : _array(array), _index(index) {}
 
-  FORCE_INLINE JsonArraySubscript& operator=(const JsonArraySubscript& src) {
+  FORCE_INLINE JsonArraySubscript &operator=(const JsonArraySubscript &src) {
     _array.set(_index, src);
     return *this;
   }
@@ -33,7 +33,7 @@ class JsonArraySubscript : public JsonVariantBase<JsonArraySubscript> {
   //          const std::string&, const String&,
   //          const JsonArray&, const JsonObject&
   template <typename T>
-  FORCE_INLINE JsonArraySubscript& operator=(const T& src) {
+  FORCE_INLINE JsonArraySubscript &operator=(const T &src) {
     _array.set(_index, src);
     return *this;
   }
@@ -41,22 +41,19 @@ class JsonArraySubscript : public JsonVariantBase<JsonArraySubscript> {
   // operator=(TValue)
   // TValue = const char*, const char[N], const FlashStringHelper*
   template <typename T>
-  FORCE_INLINE JsonArraySubscript& operator=(const T* src) {
+  FORCE_INLINE JsonArraySubscript &operator=(const T *src) {
     _array.set(_index, src);
     return *this;
   }
 
-  FORCE_INLINE bool success() const {
-    return _index < _array.size();
-  }
+  FORCE_INLINE bool success() const { return _index < _array.size(); }
 
   template <typename T>
   FORCE_INLINE typename Internals::JsonVariantAs<T>::type as() const {
     return _array.get<T>(_index);
   }
 
-  template <typename T>
-  FORCE_INLINE bool is() const {
+  template <typename T> FORCE_INLINE bool is() const {
     return _array.is<T>(_index);
   }
 
@@ -66,33 +63,31 @@ class JsonArraySubscript : public JsonVariantBase<JsonArraySubscript> {
   // TValue = bool, long, int, short, float, double, RawJson, JsonVariant,
   //          const std::string&, const String&,
   //          const JsonArray&, const JsonObject&
-  template <typename TValue>
-  FORCE_INLINE bool set(const TValue& value) {
+  template <typename TValue> FORCE_INLINE bool set(const TValue &value) {
     return _array.set(_index, value);
   }
   //
   // bool set(TValue)
   // TValue = const char*, const char[N], const FlashStringHelper*
-  template <typename TValue>
-  FORCE_INLINE bool set(const TValue* value) {
+  template <typename TValue> FORCE_INLINE bool set(const TValue *value) {
     return _array.set(_index, value);
   }
   //
   // bool set(TValue, uint8_t decimals);
   // TValue = float, double
   template <typename TValue>
-  FORCE_INLINE bool set(const TValue& value, uint8_t decimals) {
+  FORCE_INLINE bool set(const TValue &value, uint8_t decimals) {
     return _array.set(_index, value, decimals);
   }
 
- private:
-  JsonArray& _array;
+private:
+  JsonArray &_array;
   const size_t _index;
 };
 
 #if ARDUINOJSON_ENABLE_STD_STREAM
-inline std::ostream& operator<<(std::ostream& os,
-                                const JsonArraySubscript& source) {
+inline std::ostream &operator<<(std::ostream &os,
+                                const JsonArraySubscript &source) {
   return source.printTo(os);
 }
 #endif
@@ -102,7 +97,7 @@ inline JsonArraySubscript JsonArray::operator[](size_t index) {
 }
 
 inline const JsonArraySubscript JsonArray::operator[](size_t index) const {
-  return JsonArraySubscript(*const_cast<JsonArray*>(this), index);
+  return JsonArraySubscript(*const_cast<JsonArray *>(this), index);
 }
 
 template <typename TImplem>
@@ -111,12 +106,12 @@ inline JsonArraySubscript JsonVariantBase<TImplem>::operator[](int index) {
 }
 
 template <typename TImplem>
-inline const JsonArraySubscript JsonVariantBase<TImplem>::operator[](
-    int index) const {
+inline const JsonArraySubscript JsonVariantBase<TImplem>::
+operator[](int index) const {
   return as<JsonArray>()[index];
 }
 
-}  // namespace ArduinoJson
+} // namespace ArduinoJson
 
 #ifdef _MSC_VER
 #pragma warning(pop)
