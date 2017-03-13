@@ -13,7 +13,7 @@ namespace ArduinoJson {
 namespace Internals {
 
 class Encoding {
- public:
+public:
   // Optimized for code size on a 8-bit AVR
   static char escapeChar(char c) {
     const char *p = escapeTable(false);
@@ -27,13 +27,15 @@ class Encoding {
   static char unescapeChar(char c) {
     const char *p = escapeTable(true);
     for (;;) {
-      if (p[0] == '\0') return c;
-      if (p[0] == c) return p[1];
+      if (p[0] == '\0')
+        return c;
+      if (p[0] == c)
+        return p[1];
       p += 2;
     }
   }
 
- private:
+private:
   static const char *escapeTable(bool excludeIdenticals) {
     return &"\"\"\\\\b\bf\fn\nr\rt\t"[excludeIdenticals ? 4 : 0];
   }
