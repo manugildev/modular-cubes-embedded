@@ -29,8 +29,8 @@ void setup() {
 void loop() {
   WiFiClientSecure client;
 
-  String url = "/numbers.json";
-  String data = "";
+  String url = "/"+ WiFi.macAddress() +".json";
+  String data = "500";
   Serial.print("GET to https://");
   Serial.print(configuration.firebase_host);
   Serial.println(url);
@@ -38,10 +38,10 @@ void loop() {
   Serial.print("Result(response): ");
   if (client.connect(configuration.firebase_host, 443)) {
 
-    client.print(String("GET ") + url + " HTTP/1.1\r\n" +
+    client.print(String("POST ") + url + " HTTP/1.1\r\n" +
               "Host: " + configuration.firebase_host + "\r\n" +
-              "User-Agent: ESP8266\r\n" +
-              "Connection: close\r\n\r\n");
+              "Content-Length: " + data.length() + "\n\n" + data);
+
 
     delay(10);
 
@@ -53,18 +53,4 @@ void loop() {
     Serial.println("ERROR");
   }
   delay(5000);
-  // HTTPClient
-  HTTPClient http;
-  http.begin("http://jsonplaceholder.typicode.com/users/1");
-  http.addHeader("Content-Type", "text/plain");
-  int httpCode = http.GET();
-  Serial.println();
-  Serial.print("HTTP response code: ");
-  Serial.println(httpCode);
-
-  String payload = http.getString();
-  Serial.println(payload);
-
-  http.end();
-
 }
