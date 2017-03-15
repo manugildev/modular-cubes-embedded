@@ -1,5 +1,4 @@
 #include <Arduino.h>
-#include <ESP8266HTTPClient.h>
 #include <ESP8266WiFi.h>
 #include <Wire.h>
 
@@ -29,6 +28,10 @@ void setup() {
 
 void loop() {
   delay(1000);
-  DynamicJsonBuffer jsonBuffer;
-  JsonObject &root = jsonBuffer.parseObject(firebase.GET("/numbers"));
+  Serial.println("\nGET =================================");
+  Serial.println(firebase.GET("/numbers"));
+  Serial.println("\nPUT =================================");
+  Serial.println(firebase.PUT("/numbers", "{\"testing\":\"manuel\"}"));
+  Serial.println("\nPOST =================================");
+  Serial.println(firebase.POST("/numbers", "{\"testing\":\"manuel\"}"));
 }

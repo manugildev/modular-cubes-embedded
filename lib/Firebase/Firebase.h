@@ -7,13 +7,14 @@ public:
   String GET(const String path);
   String PUT(String path, String data);
   String POST(String path, String data);
-  String PATCH();
-  String DELETE();
+  String PATCH(String path, String data);
+  String DELETE(String path);
 
   JsonObject &parseJson(String json);
   String getHeaders(WiFiClientSecure client);
   String getResponseCode(String headers);
   String getResponseMessage(String headers);
+  String getResponseData(WiFiClientSecure client);
 
 private:
   bool debug_;
