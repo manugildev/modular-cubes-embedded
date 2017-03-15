@@ -8,27 +8,26 @@ void Firebase::begin(const String host, const String auth, const bool debug) {
 }
 
 // Do an HTTP request to the server
-String Firebase::request(const String method, const String path,
+String Firebase::request(RequestType method, const String path,
                          const String data = "") {
   WiFiClientSecure client;
+  String rString;
   int status = client.connect(host_.c_str(), 443);
   if (status) {
     // Building GET Request
-    client.print(String(method + " "));
+    client.print(String(RequestTypeStrings[method] + " "));
     client.print(path + ".json HTTP/1.1\r\n");
     client.print("Host: " + host_ + "\r\n");
-    switch (method) {
-    case "GET":
-      client.print("Connection: close\r\n\r\n");
-    case "PUT":
+    client.print("Connection: close\r\n");
+
+    // Changes the request depending on the method
+    if (method == GET_R || method == DELETE_R) {
+      client.print("\r\n");
+    } else if (method == PUT_R || method == POST_R || method == PATCH_R) {
       client.print("Content-Length: " + String(data.length()) + "\r\n\r\n");
       client.print(data);
-    case "POST":
-      client.print("Content-Length: " + String(data.length()) + "\r\n\r\n");
-      client.print(data);
-    case "PATCH":
-    case "DELETE":
     }
+
     delay(10);
 
     // Read and Print Headers
@@ -42,7 +41,7 @@ String Firebase::request(const String method, const String path,
     String responseData = getResponseData(client);
 
     // Build final json
-    String json = "{'data': " + responseData + ", 'response_code': '" +
+    String json = "{'data': '" + responseData + "', 'response_code': '" +
                   responseCode + "', 'response_message': '" + responseMessage +
                   "'}";
     return json;
@@ -51,100 +50,21 @@ String Firebase::request(const String method, const String path,
   }
 }
 
-String Firebase::GET(const String path) {
-  WiFiClientSecure client;
-  int status = client.connect(host_.c_str(), 443);
-  if (status) {
-    // Building GET Request
-    client.print(String("GET "));
-    client.print(path + ".json HTTP/1.1\r\n");
-    client.print("Host: " + host_ + "\r\n");
-    client.print("Connection: close\r\n\r\n");
-    delay(10);
-
-    // Read and Print Headers
-    String headers = getHeaders(client);
-
-    // Read ResponseCode and ResponseMessage
-    String responseCode = getResponseCode(headers);
-    String responseMessage = getResponseMessage(headers);
-
-    // Read Content
-    String responseData = getResponseData(client);
-
-    // Build final json
-    String json = "{'data': " + responseData + ", 'response_code': '" +
-                  responseCode + "', 'response_message': '" + responseMessage +
-                  "'}";
-    return json;
-  } else {
-    return "{'response_code': '" + String(status) + "'}";
-  }
-}
+String Firebase::GET(const String path) { return request(GET_R, path); }
 
 String Firebase::PUT(const String path, const String data) {
-  WiFiClientSecure client;
-  int status = client.connect(host_.c_str(), 443);
-  if (status) {
-    // Building GET Request
-    client.print(String("PUT "));
-    client.print(path + ".json HTTP/1.1\r\n");
-    client.print("Host: " + host_ + "\r\n");
-    client.print("Content-Length: " + String(data.length()) + "\r\n\r\n");
-    client.print(data);
-    delay(10);
-
-    // Read and Print Headers
-    String headers = getHeaders(client);
-
-    // Read ResponseCode and ResponseMessage
-    String responseCode = getResponseCode(headers);
-    String responseMessage = getResponseMessage(headers);
-
-    // Read Content
-    String responseData = getResponseData(client);
-
-    // Build final json
-    String json = "{'data': " + responseData + ", 'response_code': '" +
-                  responseCode + "', 'response_message': '" + responseMessage +
-                  "'}";
-    return json;
-  } else {
-    return "{'response_code': '" + String(status) + "'}";
-  }
+  return request(PUT_R, path, data);
 }
 
 String Firebase::POST(const String path, const String data) {
-  WiFiClientSecure client;
-  int status = client.connect(host_.c_str(), 443);
-  if (status) {
-    // Building GET Request
-    client.print(String("POST "));
-    client.print(path + ".json HTTP/1.1\r\n");
-    client.print("Host: " + host_ + "\r\n");
-    client.print("Content-Length: " + String(data.length()) + "\r\n\r\n");
-    client.print(data);
-    delay(10);
-
-    // Read and Print Headers
-    String headers = getHeaders(client);
-
-    // Read ResponseCode and ResponseMessage
-    String responseCode = getResponseCode(headers);
-    String responseMessage = getResponseMessage(headers);
-
-    // Read Content
-    String responseData = getResponseData(client);
-
-    // Build final json
-    String json = "{'data': " + responseData + ", 'response_code': '" +
-                  responseCode + "', 'response_message': '" + responseMessage +
-                  "'}";
-    return json;
-  } else {
-    return "{'response_code': '" + String(status) + "'}";
-  }
+  return request(POST_R, path, data);
 }
+
+String Firebase::PATCH(const String path, const String data) {
+  return request(PATCH_R, path, data);
+}
+
+String Firebase::DELETE(const String path) { return request(DELETE_R, path); }
 
 JsonObject &Firebase::parseJson(String json) {
   DynamicJsonBuffer jsonBuffer;

@@ -3,8 +3,12 @@
 
 class Firebase {
 public:
+  enum RequestType { GET_R, PUT_R, POST_R, PATCH_R, DELETE_R };
+  String RequestTypeStrings[5] = {"GET", "PUT", "POST", "PATCH", "DELETE"};
+
   void begin(const String host, const String auth, const bool debug = false);
-  String GET(const String path);
+  String request(RequestType method, String path, String data);
+  String GET(String path);
   String PUT(String path, String data);
   String POST(String path, String data);
   String PATCH(String path, String data);

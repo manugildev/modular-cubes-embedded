@@ -34,4 +34,8 @@ void loop() {
   Serial.println(firebase.PUT("/numbers", "{\"testing\":\"manuel\"}"));
   Serial.println("\nPOST =================================");
   Serial.println(firebase.POST("/numbers", "{\"testing\":\"manuel\"}"));
+  Serial.println("\nPATCH =================================");
+  Serial.println(firebase.PATCH("/numbers", "{\"testing\":\"maricon\"}"));
+  Serial.println("\nDELETE =================================");
+  Serial.println(firebase.DELETE("/numbers/testing"));
 }
