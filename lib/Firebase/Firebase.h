@@ -1,4 +1,3 @@
-#include <ArduinoJson.h>
 #include <WiFiClientSecure.h>
 
 class Firebase {
@@ -14,7 +13,6 @@ public:
   String PATCH(String path, String data);
   String DELETE(String path);
 
-  JsonObject &parseJson(String json);
   String getHeaders(WiFiClientSecure client);
   String getResponseCode(String headers);
   String getResponseMessage(String headers);

@@ -1,5 +1,4 @@
 #include <Firebase.h>
-Firebase firebase;
 
 void Firebase::begin(const String host, const String auth, const bool debug) {
   host_ = host;
@@ -43,10 +42,12 @@ String Firebase::request(RequestType method, const String path,
     // Build final json
     String json = "{'data': '" + responseData + "', 'response_code': '" +
                   responseCode + "', 'response_message': '" + responseMessage +
-                  "'}";
+                  "', 'requestType': '" + RequestTypeStrings[method] + "'}";
     return json;
   } else {
-    return "{'response_code': '" + String(status) + "'}";
+    return "{'response_code': '" + String(status) +
+           "', 'response_message': 'Connection to " + host_.c_str() +
+           " failed.'}";
   }
 }
 
@@ -65,15 +66,6 @@ String Firebase::PATCH(const String path, const String data) {
 }
 
 String Firebase::DELETE(const String path) { return request(DELETE_R, path); }
-
-JsonObject &Firebase::parseJson(String json) {
-  DynamicJsonBuffer jsonBuffer;
-  JsonObject &root = jsonBuffer.parseObject(json);
-  if (!root.success()) {
-    return jsonBuffer.parseObject("{'error': 'parseJson() failed;'}");
-  }
-  return root;
-}
 
 String Firebase::getHeaders(WiFiClientSecure client) {
   String headers;
@@ -110,3 +102,5 @@ String Firebase::getResponseData(WiFiClientSecure client) {
   }
   return rD;
 }
+
+Firebase firebase;
