@@ -4,15 +4,17 @@
 // Custom
 #include <Server.h>
 #include <SimpleFirebase.h>
+#include <components/Midi/MidiHelper.h>
 #include <configuration/Configuration.h>
 #include <data/ModularCube.h>
 
-void setup() {
-  Serial.begin(115200);
-  Cube.setup();
-}
+bool isConnected = false;
 
+void setup() {
+  Cube.setup();
+  Midi.setup();
+}
 void loop() {
   Cube.loop();
-  delay(1000);
+  Midi.loop();
 }

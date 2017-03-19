@@ -1,5 +1,4 @@
 #include <Arduino.h>
-#include <components/accelerometer/Accelerometer.h>
 
 class ModularCube {
 public:

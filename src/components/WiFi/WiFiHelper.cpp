@@ -1,12 +1,13 @@
+#include <ESP8266WiFi.h>
 #include <components/WiFi/WiFiHelper.h>
 
 // TODO: Variable parameters for Seconds you want to try
 // Connect to any wifi
 bool WiFiHelper::connectToWiFi(const char *ssid, const char *pass) {
   WiFi.begin(ssid, pass);
-  Serial.printf("\nConnecting to %s", ssid);
+  Serial.printf("\nConnecting to %s ", ssid);
   int tries = 0;
-  // We try to connect for ten times, if it doesn't work we just stop
+  // We try to connect for X times, if it doesn't work we just stop
   while (tries < 20) {
     if (WiFi.status() != WL_CONNECTED) {
       Serial.print(".");
