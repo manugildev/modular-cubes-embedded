@@ -1,5 +1,5 @@
 # Notes
-
+This is kind of my project diary. I will keep thoughts and ideas in here as well as in my notebook. If you are reading this, please don't laugh on how I think to myself. I just write whatever it comes to my mind. *Have Fun*
 ## Server
 - One of the problems that I will face for sure, is that i don't know how to keep the devices in "ImAlive" state in the server. These devices don't have a clock that I can check, and without a proper server to check the time when the Request are done this is not gonna work. Having them synchronized when the device starts it is a good idea, but yes, you always need them to be connected to the internet.
 - Once the time thing is done, I could start working on the real client.

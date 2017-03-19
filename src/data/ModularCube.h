@@ -23,14 +23,15 @@ public:
   void loop();
 
   // TODO: Change this methods to a wifi specific class
-  bool findCubesWifi();
+  bool connectToWifi(const char *ssid, const char *pass);
+  bool checkIfWifiExists(const char *ssid);
 
 private:
-  String deviceName;
-  String deviceId;
-  String wlan;
-  String localIP;
-  int currentOrientation;
+  String deviceName = "";
+  String deviceId = "";
+  String wlan = "";
+  String localIP = "";
+  int currentOrientation = 0;
 
   // connectionmode
   // Midi midi;

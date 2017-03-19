@@ -3,28 +3,37 @@
 #include <data/ModularCube.h>
 
 void ModularCube::setup() {
-  Serial.begin(115200);
-  WiFi.begin(configuration.ssid, configuration.pass);
-
-  // Connecting to WIFI
-  Serial.print("\nConnecting");
-  while (WiFi.status() != WL_CONNECTED) {
-    Serial.print(".");
-    delay(400);
-  }
-
-  Serial.printf("\nConnected to %s\n", configuration.ssid);
-  Serial.print("Local IP: ");
-  Serial.println(WiFi.localIP());
+  connectToWifi(configuration.ssid, configuration.pass);
 }
 void ModularCube::loop() {
   currentOrientation = accelerometer.getCurrentOrientation();
   Serial.println(String(currentOrientation));
-  delay(1000);
 }
 
-bool ModularCube::findCubesWifi() {
-  Serial.print("Trying to find Cubes_WIFI...");
+// Connect to any wify
+bool ModularCube::connectToWifi(const char *ssid, const char *pass) {
+  WiFi.begin(ssid, pass);
+  Serial.printf("\nConnecting to %d", ssid);
+  int tries = 0;
+  // We try to connect for ten times, if it doesn't work we just stop
+  while (tries < 10) {
+    if (WiFi.status() != WL_CONNECTED) {
+      Serial.print(".");
+      delay(400);
+      tries++;
+    } else {
+      Serial.printf("\nConnected to %s.\n", ssid);
+      Serial.print("Local IP: ");
+      Serial.println(WiFi.localIP());
+      return true;
+    }
+    Serial.printf("\nConnection to %s failed.", ssid);
+    return false;
+  }
+}
+
+bool ModularCube::checkIfWifiExists(const char *ssid) {
+  Serial.printf("Trying to find %s...", ssid);
   int tries = 0;
 
   // We set the WiFi to Station Mode and Disconnect from any other WiFi
@@ -36,14 +45,15 @@ bool ModularCube::findCubesWifi() {
     Serial.println(" network(s) found");
     for (int i = 0; i < n; i++) {
       Serial.println(WiFi.SSID(i));
-      if (WiFi.SSID(i) == configuration.ssid) {
+      if (WiFi.SSID(i) == ssid) {
+        Serial.printf("%s found.", ssid);
         return true;
       }
       delay(400);
       tries++;
-      Serial.println("Cubes_WIFI not found. Trying again.");
+      Serial.printf("%s not found. Trying again.\n", ssid);
     }
-    Serial.println("Cubes_WIFI could not be found.");
+    Serial.printf("%s could not be found.\n", ssid);
     return false;
   }
 }
