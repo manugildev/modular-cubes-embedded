@@ -1,5 +1,5 @@
-#include <Accelerometer.h>
 #include <Arduino.h>
+#include <components/accelerometer/Accelerometer.h>
 
 class ModularCube {
 public:
@@ -21,10 +21,6 @@ public:
   String getJson();
   void setup();
   void loop();
-
-  // TODO: Change this methods to a wifi specific class
-  bool connectToWifi(const char *ssid, const char *pass);
-  bool checkIfWifiExists(const char *ssid);
 
 private:
   String deviceName = "";
