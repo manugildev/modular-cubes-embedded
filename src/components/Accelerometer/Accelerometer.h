@@ -2,6 +2,7 @@
 
 class Accelerometer {
 public:
+  // Variables
   int getCurrentOrientation();
 };
 

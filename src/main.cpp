@@ -8,13 +8,5 @@
 #include <configuration/Configuration.h>
 #include <data/ModularCube.h>
 
-bool isConnected = false;
-
-void setup() {
-  Cube.setup();
-  Midi.setup();
-}
-void loop() {
-  Cube.loop();
-  Midi.loop();
-}
+void setup() { Cube.setup(); }
+void loop() { Cube.loop(); }

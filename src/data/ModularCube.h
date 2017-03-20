@@ -2,31 +2,33 @@
 
 class ModularCube {
 public:
+  // Constructor
+  ModularCube();
   // Variable Setters
-  void setDeviceName(String deviceName);
+  void setDeviceName(String dN);
   void setDeviceID(String deviceId);
   void setWlan(String wlan);
   void setLocalIP(String localIP);
   void setCurrentOrientation(int currentOrientation);
-
   // Variable Getters
   String getDeviceName();
   String getDeviceId();
   String getWlan();
   String getLocalIP();
   int getCurrentOrientation();
-
   // Other Methods
   String getJson();
   void setup();
   void loop();
 
 private:
-  String deviceName = "";
-  String deviceId = "";
-  String wlan = "";
-  String localIP = "";
-  int currentOrientation = 0;
+  // Variables
+  unsigned int t0;
+  String deviceName;
+  String deviceId;
+  String wlan;
+  String localIP;
+  int currentOrientation;
 
   // connectionmode
   // Midi midi;
