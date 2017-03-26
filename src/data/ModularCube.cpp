@@ -1,3 +1,4 @@
+#include <ESP8266WiFi.h>
 #include <components/Midi/MidiHelper.h>
 #include <components/WiFi/WiFiHelper.h>
 #include <components/accelerometer/Accelerometer.h>
@@ -26,6 +27,7 @@ void ModularCube::setup() {
   } else {
     WH.connectToWiFi(configuration.cubes_ssid, configuration.cubes_pass);
   }
+  setConnectionMode(WiFi.getMode());
 
   Midi.setup();
   Serial.println("SetUp for ModularCube done.\n");
@@ -33,7 +35,7 @@ void ModularCube::setup() {
 
 void ModularCube::loop() {
   // TODO: Change the time variable to run every X seconds
-  if ((millis() - t0) > 0) {
+  if ((millis() - t0) > 1000) {
     t0 = millis();
     currentOrientation = accelerometer.getCurrentOrientation();
     Serial.println(String(currentOrientation));
@@ -49,6 +51,7 @@ void ModularCube::setDeviceID(String dI) { deviceId = dI; }
 void ModularCube::setWlan(String w) { wlan = w; }
 void ModularCube::setLocalIP(String lI) { localIP = lI; }
 void ModularCube::setCurrentOrientation(int cO) { currentOrientation = cO; }
+void ModularCube::setConnectionMode(WiFiMode wM) { connectionMode = wM; }
 
 /****************************************************************************
 * GETTERS
@@ -58,5 +61,6 @@ String ModularCube::getDeviceId() { return deviceId; }
 String ModularCube::getWlan() { return wlan; }
 String ModularCube::getLocalIP() { return localIP; }
 int ModularCube::getCurrentOrientation() { return currentOrientation; }
+WiFiMode ModularCube::getConnectionMode() { return connectionMode; }
 
 ModularCube Cube;

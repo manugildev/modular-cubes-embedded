@@ -15,7 +15,10 @@ MidiHelper::MidiHelper() {
 void MidiHelper::setup() {
   Serial.println("\nCreating AppleMidi Session.");
   Serial.printf(" - Session Name: %s\n", configuration.apple_midi_session);
-  Serial.printf(" - Host/Port: %s:5004\n", String(WiFi.localIP()).c_str());
+  IPAddress ip = WiFi.localIP();
+  Serial.print(" - Host/Port: ");
+  Serial.print(ip);
+  Serial.println(":5004");
 
   AppleMIDI.begin(configuration.apple_midi_session);
   setupCallbacks();
