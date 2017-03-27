@@ -1,5 +1,6 @@
 #include <ESP8266WiFi.h>
 #include <components/WiFi/WiFiHelper.h>
+#include <configuration/Configuration.h>
 
 // TODO: Variable parameters for Seconds you want to try
 // Connect to any wifi
@@ -8,13 +9,14 @@ bool WiFiHelper::connectToWiFi(const char *ssid, const char *pass) {
   Serial.printf("\nConnecting to %s ", ssid);
   int tries = 0;
   // We try to connect for X times, if it doesn't work we just stop
-  while (tries < 20) {
+  while (tries < 40) {
     if (WiFi.status() != WL_CONNECTED) {
       Serial.print(".");
-      delay(800);
+      // TODO: Change delay
+      delay(100);
       tries++;
     } else if (WiFi.status() == WL_CONNECTED) {
-      Serial.printf("\nConnected to %s.\n", ssid);
+      Serial.printf("\nConnected to %s\n", ssid);
       Serial.print("Local IP: ");
       Serial.println(WiFi.localIP());
       return true;
@@ -36,7 +38,7 @@ bool WiFiHelper::checkIfWiFiExists(const char *ssid) {
   // We set the WiFi to Station Mode and Disconnect from any other WiFi
   WiFi.mode(WIFI_STA);
   WiFi.disconnect();
-  while (tries < 5) {
+  while (tries < 1) {
     int n = WiFi.scanNetworks();
     Serial.printf("%i - %i network(s) found. ", tries, n);
     for (int i = 0; i < n; i++) {
@@ -45,7 +47,8 @@ bool WiFiHelper::checkIfWiFiExists(const char *ssid) {
       }
     }
     Serial.printf("%s Not found.\n", ssid);
-    delay(400);
+    // TODO: Change delay
+    delay(1);
     tries++;
   }
   Serial.printf("After %i tries %s could not be found.\n", tries, ssid);
@@ -59,6 +62,68 @@ bool WiFiHelper::createWiFiAP(const char *ssid, const char *pass) {
   WiFi.softAP(ssid, pass);
   String ip = WiFi.softAPIP().toString();
   Serial.printf("AP IP adress: %s", ip.c_str());
+}
+
+String WiFiHelper::generateSSID() {
+  const char *mssid = String(String(configuration.cubes_ssid) + "_M").c_str();
+  String smssid = String(String(configuration.cubes_ssid) + "_M");
+
+  if (checkIfWiFiExists(mssid)) {
+    return mssid;
+  } else {
+    WiFi.mode(WIFI_STA);
+    WiFi.disconnect();
+    int n = WiFi.scanNetworks();
+    int maxNumber = 0;
+    Serial.printf("%i network(s) found. \n", n);
+    // This bucle should return the maximum index of the network
+    for (int i = 0; i < n; i++) {
+      String curr_ssid = WiFi.SSID(i);
+      if (curr_ssid.startsWith(configuration.cubes_ssid) &&
+          curr_ssid != smssid) {
+        int number = curr_ssid.substring(curr_ssid.indexOf("_") + 1).toInt();
+        Serial.printf("Number found %i\n", number);
+        if (number > maxNumber) {
+          maxNumber = number;
+        }
+      }
+    }
+
+    String previous = "";
+    if (maxNumber == 0) {
+      return String(String(configuration.cubes_ssid) + "_0001");
+    } else {
+      char buffer[4] = "";
+      sprintf(buffer, "%04d", maxNumber);
+      previous = buffer;
+    }
+    // Generate the SSID based on the number
+    String nT = previous;
+    char nA[nT.length() + 1];
+    strcpy(nA, nT.c_str());
+    // Reverse to work with it
+    const size_t len = strlen(nA);
+    for (size_t i = 0; i < len / 2; i++)
+      std::swap(nA[i], nA[len - i - 1]);
+
+    for (int i = 0; i < strlen(nA); i++) {
+      int tN = nA[i] - '0'; // Convert char to int
+      if (tN >= 4) {
+        nA[i] = '1';
+      } else {
+        nA[i] = (tN + 1) + '0';
+        break;
+      }
+    }
+
+    previous = String(nA);
+    // Reverse the string to return final string
+    for (size_t i = 0; i < len / 2; i++)
+      std::swap(nA[i], nA[len - i - 1]);
+
+    String next = String(nA);
+    return String(String(configuration.cubes_ssid) + "_" + next);
+  }
 }
 
 WiFiHelper WH;

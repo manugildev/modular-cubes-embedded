@@ -12,6 +12,7 @@ This is kind of my project diary. I will keep thoughts and ideas in here as well
 - In terms of WiFi configuration, another idea could be to just configure the password in one of them, that password will be sent to the firebase api, and the first one will create a network in order to make the others connect.
 - **Wifi Server to set Password:** At the beginning I can set a WiFi Server from the first one in order to set the password of the home wifi, and then connect to it. Maybe is the best idea to avoid any problems when it comes to the cubes not connected to any wifi.
 - **Wifi loop:** Setup a loop for the Wifi that checks at every time if the device is connected. Maybe show an input on that.
+- **27/03/2017 - 00:35** > *Research about WifiMesh:* A wifi mesh seems the only viable network structure to share information between a unlimited number of nodes, which will solve the problem that has the ESP with the max number of connections to the same AP. Gotta look deeper into this idea.
 
 ## Midi
 - About midi there are so many options. I could work with the devices as Inputs to the Web Midi Api that will act realtime on the Client. This could open lots of possibilities to the project and make it even better than just having to set a fucking local network to control everything. IoT, please.

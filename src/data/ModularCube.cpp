@@ -7,29 +7,28 @@
 
 ModularCube::ModularCube() {
   t0 = millis();
-  deviceName = "";
-  deviceId = "";
-  wlan = "";
-  localIP = "";
-  currentOrientation = 0;
+  setDeviceName(""); // I could set this to the SSID
+  setDeviceID(String(ESP.getChipId()));
+  setWlan("");
+  setLocalIP("");
+  setCurrentOrientation(0);
 }
 
 void ModularCube::setup() {
   Serial.begin(115200);
   Serial.println("\nSetting Up ModularCube.");
-
-  if (!WH.checkIfWiFiExists(configuration.cubes_ssid)) {
-    WH.createWiFiAP(configuration.cubes_ssid, configuration.cubes_pass);
+  const char *mssid = String(String(configuration.cubes_ssid) + "_M").c_str();
+  if (!WH.checkIfWiFiExists(mssid)) {
+    WH.createWiFiAP(mssid, configuration.cubes_pass);
     // At the end it tries to connect to the home wifi
     // TODO: Setup a webserver if it cant connect to it and set the password in
     // there
     WH.connectToWiFi(configuration.ssid, configuration.pass);
   } else {
-    WH.connectToWiFi(configuration.cubes_ssid, configuration.cubes_pass);
+
+    WH.connectToWiFi(mssid, configuration.cubes_pass);
   }
   setConnectionMode(WiFi.getMode());
-
-  Midi.setup();
   Serial.println("SetUp for ModularCube done.\n");
 }
 
@@ -40,7 +39,6 @@ void ModularCube::loop() {
     currentOrientation = accelerometer.getCurrentOrientation();
     Serial.println(String(currentOrientation));
   }
-  Midi.loop();
 }
 
 /****************************************************************************
