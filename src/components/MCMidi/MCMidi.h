@@ -1,9 +1,9 @@
 #include <Arduino.h>
 
-class MidiHelper {
+class MCMidi {
 public:
   // Constructor
-  MidiHelper();
+  MCMidi();
   // Variables
   bool isConnected;
   // Methods
@@ -17,4 +17,4 @@ private:
   void setupCallbacks();
 };
 
-extern MidiHelper Midi;
+extern MCMidi MC_Midi;

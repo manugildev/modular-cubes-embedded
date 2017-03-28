@@ -1,18 +1,18 @@
 #include <AppleMidi.h>
 #include <ESP8266WiFi.h>
 #include <WiFiUdp.h>
-#include <components/Midi/MidiHelper.h>
+#include <components/MCMidi/MCMidi.h>
 #include <configuration/Configuration.h>
 #include <data/ModularCube.h>
 
 APPLEMIDI_CREATE_INSTANCE(WiFiUDP, AppleMIDI);
 
-MidiHelper::MidiHelper() {
+MCMidi::MCMidi() {
   isConnected = false;
   t0 = millis();
 }
 
-void MidiHelper::setup() {
+void MCMidi::setup() {
   Serial.println("\nCreating AppleMidi Session.");
   Serial.printf(" - Session Name: %s\n", configuration.apple_midi_session);
   IPAddress ip = WiFi.localIP();
@@ -24,7 +24,7 @@ void MidiHelper::setup() {
   setupCallbacks();
 }
 
-void MidiHelper::loop() {
+void MCMidi::loop() {
   // Listen to incoming notes
   AppleMIDI.run();
 
@@ -40,14 +40,14 @@ void MidiHelper::loop() {
   }
 }
 
-void MidiHelper::setupCallbacks() {
+void MCMidi::setupCallbacks() {
   AppleMIDI.OnConnected([](uint32_t ssrc, char *name) {
-    Midi.isConnected = true;
+    MC_Midi.isConnected = true;
     Serial.printf(" - Connected to Session: \n", name);
   });
 
   AppleMIDI.OnDisconnected([](uint32_t ssrc) {
-    Midi.isConnected = false;
+    MC_Midi.isConnected = false;
     Serial.printf(" - Disconnected\n");
   });
 
@@ -72,4 +72,4 @@ void MidiHelper::setupCallbacks() {
   });
 }
 
-MidiHelper Midi;
+MCMidi MC_Midi;

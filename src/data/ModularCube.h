@@ -1,4 +1,6 @@
 #include <Arduino.h>
+
+#include <ESP8266HTTPClient.h>
 #include <ESP8266WIFITYPE.h>
 
 class ModularCube {
@@ -12,6 +14,7 @@ public:
   void setLocalIP(String localIP);
   void setCurrentOrientation(int currentOrientation);
   void setConnectionMode(WiFiMode wifiMode);
+  void setMaster(bool master);
   // Variable Getters
   String getDeviceName();
   String getDeviceId();
@@ -19,10 +22,12 @@ public:
   String getLocalIP();
   int getCurrentOrientation();
   WiFiMode getConnectionMode();
+  bool isMaster();
   // Other Methods
-  String getJson();
   void setup();
   void loop();
+  void setUpWiFi();
+  String getJson();
 
 private:
   // Variables
@@ -33,9 +38,7 @@ private:
   String localIP;
   int currentOrientation;
   WiFiMode connectionMode;
-
-  // Midi midi;
-  // Accelerometer accelerometer;
+  bool master;
 };
 
 extern ModularCube Cube;

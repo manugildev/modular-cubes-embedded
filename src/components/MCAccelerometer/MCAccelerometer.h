@@ -1,9 +1,9 @@
 #include <Arduino.h>
 
-class Accelerometer {
+class MCAccelerometer {
 public:
   // Variables
   int getCurrentOrientation();
 };
 
-extern Accelerometer accelerometer;
+extern MCAccelerometer MC_Accelerometer;
