@@ -8,18 +8,20 @@ public:
   // Constructor
   ModularCube();
   // Variable Setters
-  void setDeviceName(String dN);
   void setDeviceID(String deviceId);
   void setWlan(String wlan);
   void setLocalIP(String localIP);
+  void setAPName(String APName);
   void setCurrentOrientation(int currentOrientation);
   void setConnectionMode(WiFiMode wifiMode);
   void setMaster(bool master);
+  void setChilds(String childs);
   // Variable Getters
-  String getDeviceName();
   String getDeviceId();
   String getWlan();
   String getLocalIP();
+  String getAPName();
+  String getChilds();
   int getCurrentOrientation();
   WiFiMode getConnectionMode();
   bool isMaster();
@@ -32,13 +34,14 @@ public:
 private:
   // Variables
   unsigned int t0;
-  String deviceName;
   String deviceId;
   String wlan;
   String localIP;
+  String APName;
   int currentOrientation;
   WiFiMode connectionMode;
   bool master;
+  String childs;
 };
 
 extern ModularCube Cube;

@@ -1,6 +1,7 @@
 #include <ESP8266WiFi.h>
 #include <components/WiFi/WiFiHelper.h>
 #include <configuration/Configuration.h>
+#include <data/ModularCube.h>
 
 // TODO: Variable parameters for Seconds you want to try
 // Connect to any wifi
@@ -68,6 +69,7 @@ String WiFiHelper::generateSSID() {
   String smssid = String(String(configuration.cubes_ssid) + "_M");
 
   if (!checkIfWiFiExists(mssid)) {
+    Cube.setMaster(true);
     return mssid;
   } else {
     WiFi.mode(WIFI_STA);

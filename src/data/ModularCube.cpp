@@ -9,12 +9,13 @@
 
 ModularCube::ModularCube() {
   t0 = millis();
-  setDeviceName(""); // I could set this to the SSID
   setDeviceID(String(ESP.getChipId()));
   setWlan("");
   setLocalIP("");
+  setAPName("");
   setCurrentOrientation(0);
   setMaster(false);
+  setChilds("");
 }
 
 void ModularCube::setup() {
@@ -32,6 +33,7 @@ void ModularCube::loop() {
     t0 = millis();
     currentOrientation = MC_Accelerometer.getCurrentOrientation();
     Serial.println(String(currentOrientation));
+    // Serial.println(String(getJson()));
   }
 }
 
@@ -41,33 +43,51 @@ void ModularCube::setUpWiFi() {
   String connectTo = WH.getConnectTo(wifiName);
   WH.createWiFiAP(wifiName.c_str());
   if (wifiName == mssid) {
-    WH.connectToWiFi(connectTo.c_str(), configuration.pass);
+    setMaster(true);
+    if (WH.connectToWiFi(connectTo.c_str(), configuration.pass))
+      setWlan(connectTo);
   } else {
-    WH.connectToWiFi(connectTo.c_str());
+    if (WH.connectToWiFi(connectTo.c_str()))
+      setWlan(connectTo);
   }
+  setAPName(wifiName);
+  setLocalIP(String(WiFi.localIP()));
   setConnectionMode(WiFi.getMode());
 }
 
 /****************************************************************************
 * SETTERS
 ****************************************************************************/
-void ModularCube::setDeviceName(String dN) { deviceName = dN; }
 void ModularCube::setDeviceID(String dI) { deviceId = dI; }
 void ModularCube::setWlan(String w) { wlan = w; }
 void ModularCube::setLocalIP(String lI) { localIP = lI; }
+void ModularCube::setAPName(String APN) { APName = APN; }
 void ModularCube::setCurrentOrientation(int cO) { currentOrientation = cO; }
 void ModularCube::setConnectionMode(WiFiMode wM) { connectionMode = wM; }
+void ModularCube::setMaster(bool m) { master = m; }
+void ModularCube::setChilds(String c) { childs = c; }
 
 /****************************************************************************
 * GETTERS
 ****************************************************************************/
-String ModularCube::getDeviceName() { return deviceName; }
 String ModularCube::getDeviceId() { return deviceId; }
 String ModularCube::getWlan() { return wlan; }
 String ModularCube::getLocalIP() { return localIP; }
+String ModularCube::getAPName() { return APName; }
 int ModularCube::getCurrentOrientation() { return currentOrientation; }
 WiFiMode ModularCube::getConnectionMode() { return connectionMode; }
+bool ModularCube::isMaster() { return master; }
+String ModularCube::getChilds() { return childs; }
 
-String getJson() {}
+String ModularCube::getJson() {
+  // TODO: Childs should only appear maybe on the MASTER, or maybe not. Since
+  // this network is based on a TREE Network
+  return "{\"" + getAPName() + "\":{\"wlan\":\"" + getWlan() +
+         "\",\"localIP\":\"" + getLocalIP() + "\",\"APName\":\"" + getAPName() +
+         "\",\"currentOrientation\":\"" + getCurrentOrientation() +
+         "\",\"connectionMode\":\"" + getConnectionMode() + "\",\"master\":\"" +
+         isMaster() + "\",\"deviceId\":\"" + getDeviceId() +
+         "\",\"childs\":\"" + getChilds() + "\"}}";
+}
 
 ModularCube Cube;
