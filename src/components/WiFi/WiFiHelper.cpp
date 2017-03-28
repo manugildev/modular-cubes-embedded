@@ -4,12 +4,12 @@
 
 // TODO: Variable parameters for Seconds you want to try
 // Connect to any wifi
-bool WiFiHelper::connectToWiFi(const char *ssid, const char *pass) {
+bool WiFiHelper::connectToWiFi(const char *ssid, const char *pass, int times) {
   WiFi.begin(ssid, pass);
   Serial.printf("\nConnecting to %s ", ssid);
   int tries = 0;
   // We try to connect for X times, if it doesn't work we just stop
-  while (tries < 40) {
+  while (tries < times) {
     if (WiFi.status() != WL_CONNECTED) {
       Serial.print(".");
       // TODO: Change delay
@@ -31,14 +31,14 @@ bool WiFiHelper::connectToWiFi(const char *ssid, const char *pass) {
 
 // TODO: Variable parameters for Seconds you want to try
 // Checks if the wifi passed in the parameters exist, returns true or false
-bool WiFiHelper::checkIfWiFiExists(const char *ssid) {
-  Serial.printf("\nTrying to find %s...\n", ssid);
+bool WiFiHelper::checkIfWiFiExists(const char *ssid, int times) {
+  Serial.printf("Trying to find %s...\n", ssid);
   int tries = 0;
 
   // We set the WiFi to Station Mode and Disconnect from any other WiFi
   WiFi.mode(WIFI_STA);
   WiFi.disconnect();
-  while (tries < 1) {
+  while (tries < times) {
     int n = WiFi.scanNetworks();
     Serial.printf("%i - %i network(s) found. ", tries, n);
     for (int i = 0; i < n; i++) {
@@ -57,7 +57,6 @@ bool WiFiHelper::checkIfWiFiExists(const char *ssid) {
 
 // Creates WiFi Hotspot
 bool WiFiHelper::createWiFiAP(const char *ssid, const char *pass) {
-  Serial.println();
   Serial.printf("Starting Access Point: %s\n", ssid);
   WiFi.softAP(ssid, pass);
   String ip = WiFi.softAPIP().toString();
@@ -68,7 +67,7 @@ String WiFiHelper::generateSSID() {
   const char *mssid = String(String(configuration.cubes_ssid) + "_M").c_str();
   String smssid = String(String(configuration.cubes_ssid) + "_M");
 
-  if (checkIfWiFiExists(mssid)) {
+  if (!checkIfWiFiExists(mssid)) {
     return mssid;
   } else {
     WiFi.mode(WIFI_STA);
@@ -123,6 +122,27 @@ String WiFiHelper::generateSSID() {
 
     String next = String(nA);
     return String(String(configuration.cubes_ssid) + "_" + next);
+  }
+}
+
+String WiFiHelper::getConnectTo(String apssid) {
+  String mssid = String(String(configuration.cubes_ssid) + "_M");
+  if (apssid == mssid) {
+    return configuration.ssid;
+  } else {
+    int start = apssid.indexOf("_") + 1;
+    int end = apssid.length();
+    int number = apssid.substring(start, end).toInt();
+
+    // If the nodes are primary
+    if (number > 0 && number <= 4)
+      return mssid;
+    // If the nodes are not primary
+    char buffer[4] = "";
+    String snum = String(number);
+    int finalNum = snum.substring(0, snum.length() - 1).toInt();
+    sprintf(buffer, "%04d", finalNum);
+    return String(String(configuration.cubes_ssid) + "_" + buffer);
   }
 }
 

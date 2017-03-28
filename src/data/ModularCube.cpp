@@ -1,9 +1,11 @@
-#include <ESP8266WiFi.h>
-#include <components/Midi/MidiHelper.h>
-#include <components/WiFi/WiFiHelper.h>
-#include <components/accelerometer/Accelerometer.h>
-#include <configuration/Configuration.h>
 #include <data/ModularCube.h>
+
+#include <ESP8266WiFi.h>
+#include <components/MCAccelerometer/MCAccelerometer.h>
+#include <components/MCMidi/MCMidi.h>
+#include <components/MCServer/MCServer.h>
+#include <components/WiFi/WiFiHelper.h>
+#include <configuration/Configuration.h>
 
 ModularCube::ModularCube() {
   t0 = millis();
@@ -12,33 +14,38 @@ ModularCube::ModularCube() {
   setWlan("");
   setLocalIP("");
   setCurrentOrientation(0);
+  setMaster(false);
 }
 
 void ModularCube::setup() {
   Serial.begin(115200);
   Serial.println("\nSetting Up ModularCube.");
-  const char *mssid = String(String(configuration.cubes_ssid) + "_M").c_str();
-  if (!WH.checkIfWiFiExists(mssid)) {
-    WH.createWiFiAP(mssid, configuration.cubes_pass);
-    // At the end it tries to connect to the home wifi
-    // TODO: Setup a webserver if it cant connect to it and set the password in
-    // there
-    WH.connectToWiFi(configuration.ssid, configuration.pass);
-  } else {
-
-    WH.connectToWiFi(mssid, configuration.cubes_pass);
-  }
-  setConnectionMode(WiFi.getMode());
+  setUpWiFi();
+  MC_Server.begin();
   Serial.println("SetUp for ModularCube done.\n");
 }
 
 void ModularCube::loop() {
+  MC_Server.loop();
   // TODO: Change the time variable to run every X seconds
   if ((millis() - t0) > 1000) {
     t0 = millis();
-    currentOrientation = accelerometer.getCurrentOrientation();
+    currentOrientation = MC_Accelerometer.getCurrentOrientation();
     Serial.println(String(currentOrientation));
   }
+}
+
+void ModularCube::setUpWiFi() {
+  String mssid = String(String(configuration.cubes_ssid) + "_M");
+  String wifiName = WH.generateSSID();
+  String connectTo = WH.getConnectTo(wifiName);
+  WH.createWiFiAP(wifiName.c_str());
+  if (wifiName == mssid) {
+    WH.connectToWiFi(connectTo.c_str(), configuration.pass);
+  } else {
+    WH.connectToWiFi(connectTo.c_str());
+  }
+  setConnectionMode(WiFi.getMode());
 }
 
 /****************************************************************************
@@ -60,5 +67,7 @@ String ModularCube::getWlan() { return wlan; }
 String ModularCube::getLocalIP() { return localIP; }
 int ModularCube::getCurrentOrientation() { return currentOrientation; }
 WiFiMode ModularCube::getConnectionMode() { return connectionMode; }
+
+String getJson() {}
 
 ModularCube Cube;
