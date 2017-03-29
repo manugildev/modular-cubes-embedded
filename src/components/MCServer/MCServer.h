@@ -4,14 +4,16 @@
 class MCServer {
 public:
   MCServer();
-  void begin();
+  void setup();
   void loop();
-
   // Requests Handlers
   void handleGET();
-  void handlePUT();
-  void handlePOST();
-  void handleDELETE();
+  void handleUPDATE();
+  // Request Calls
+  String GET();
+  bool UPDATE(String data);
+  // Error Handlers
+  String parseError(String data);
 
 private:
   String homePage;
