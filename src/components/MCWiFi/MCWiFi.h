@@ -14,6 +14,7 @@ public:
   String ipAdressToString(const IPAddress &ipAddress);
 
 private:
+  int maxDevicesPerAP;
 };
 
 extern MCWiFi MC_WiFi;

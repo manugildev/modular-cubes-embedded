@@ -4,17 +4,22 @@
 #include <data/ModularCube.h>
 
 void MCWiFi::setup() {
+  pinMode(2, OUTPUT); // Just to blink whenever is connecting
+  maxDevicesPerAP = 4;
   String mssid = String(String(configuration.cubes_ssid) + "_M");
   String wifiName = generateSSID();
   String connectTo = getConnectTo(wifiName);
   createWiFiAP(wifiName.c_str());
   if (wifiName == mssid) {
+    // createWiFiAP(wifiName.c_str());
     Cube.setMaster(true);
     if (connectToWiFi(connectTo.c_str(), configuration.pass, 10000))
       Cube.setWlan(connectTo);
+    WiFi.mode(WIFI_AP_STA);
   } else {
-    if (connectToWiFi(connectTo.c_str()))
+    if (connectToWiFi(connectTo.c_str(), "", 10000))
       Cube.setWlan(connectTo);
+    WiFi.mode(WIFI_STA); // TODO: WTF (Connection mode makes the whole fail)
   }
   Cube.setAPName(wifiName);
   Cube.setLocalIP(ipAdressToString(WiFi.localIP()));
@@ -31,7 +36,10 @@ bool MCWiFi::connectToWiFi(const char *ssid, const char *pass, int wait) {
   while (tries < maxTries) {
     if (WiFi.status() != WL_CONNECTED) {
       Serial.print(".");
-      delay(100);
+      digitalWrite(2, LOW);
+      delay(50);
+      digitalWrite(2, HIGH);
+      delay(50);
       tries++;
     } else if (WiFi.status() == WL_CONNECTED) {
       Serial.printf("\nConnected to %s\n", ssid);
@@ -39,10 +47,13 @@ bool MCWiFi::connectToWiFi(const char *ssid, const char *pass, int wait) {
       Serial.println(WiFi.localIP());
       return true;
     } else if (WiFi.status() == WL_CONNECT_FAILED) {
+      digitalWrite(2, LOW);
       Serial.printf("\nConnection to %s failed.\n", ssid);
       return false;
     }
   }
+
+  digitalWrite(2, LOW);
   Serial.printf("\nConnection to %s failed.\n", ssid);
   return false;
 }
@@ -124,9 +135,10 @@ String MCWiFi::generateSSID() {
     for (size_t i = 0; i < len / 2; i++)
       std::swap(nA[i], nA[len - i - 1]);
 
+    // TODO: Make this so it can fill the gaps
     for (int i = 0; i < strlen(nA); i++) {
       int tN = nA[i] - '0'; // Convert char to int
-      if (tN >= 4) {
+      if (tN >= maxDevicesPerAP) {
         nA[i] = '1';
       } else {
         nA[i] = (tN + 1) + '0';
@@ -156,7 +168,7 @@ String MCWiFi::getConnectTo(String apssid) {
     int number = apssid.substring(start, end).toInt();
 
     // If the nodes are primary
-    if (number > 0 && number <= 4)
+    if (number > 0 && number <= maxDevicesPerAP)
       return mssid;
     // If the nodes are not primary
     char buffer[4] = "";

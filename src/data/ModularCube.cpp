@@ -37,6 +37,10 @@ void ModularCube::loop() {
     currentOrientation = MC_Accelerometer.getCurrentOrientation();
     Serial.println("Current Orientation: " + String(currentOrientation));
     // Serial.println(String(getJson()));
+    if (!Cube.isMaster()) {
+      Serial.println(MC_Server.UPDATE(getJson()));
+      Serial.println(MC_Server.GET());
+    }
   }
 }
 
@@ -64,12 +68,18 @@ WiFiMode ModularCube::getConnectionMode() { return connectionMode; }
 bool ModularCube::isMaster() { return master; }
 String ModularCube::getChilds() { return childs; }
 String ModularCube::getJson() {
-  return "{\"" + getAPName() + "\":{\"wlan\":\"" + getWlan() +
-         "\",\"localIP\":\"" + getLocalIP() + "\",\"APName\":\"" + getAPName() +
-         "\",\"currentOrientation\":\"" + getCurrentOrientation() +
-         "\",\"connectionMode\":\"" + getConnectionMode() + "\",\"master\":\"" +
-         isMaster() + "\",\"deviceId\":\"" + getDeviceId() + "\",\"childs\":" +
-         getChilds() + "}}";
+  // return "{\"" + getDeviceId() + "\":{\"wlan\":\"" + getWlan() +
+  //        "\",\"localIP\":\"" + getLocalIP() + "\",\"APName\":\"" +
+  //        getAPName() +
+  //        "\",\"currentOrientation\":\"" + getCurrentOrientation() +
+  //        "\",\"connectionMode\":\"" + getConnectionMode() +
+  //        "\",\"master\":\"" +
+  //        isMaster() + "\",\"deviceId\":\"" + getDeviceId() + "\",\"childs\":"
+  //        +
+  //        getChilds() + "}}";
+
+  return "{\"" + getDeviceId() + "\":{\"currentOrientation\":\"" +
+         getCurrentOrientation() + "\",\"childs\":" + getChilds() + "}}";
 }
 
 ModularCube Cube;

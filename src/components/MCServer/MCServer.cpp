@@ -32,7 +32,7 @@ void MCServer::handleUPDATE() {
     String data = server.arg("data");
     DynamicJsonBuffer jsonBuffer;
     JsonObject &root = jsonBuffer.parseObject(Cube.getJson());
-    JsonObject &element = root[Cube.getAPName()].as<JsonObject>();
+    JsonObject &element = root[Cube.getDeviceId()].as<JsonObject>();
 
     String childs = Cube.getChilds();
     JsonObject &childsObject = element["childs"].as<JsonObject>();
@@ -78,7 +78,8 @@ String MCServer::GET() {
 bool MCServer::UPDATE(String data) {
   if (WiFi.status() == WL_CONNECTED) {
     String response;
-    int statusCode = client.put("/api", data.c_str(), &response);
+    String url = "/api?data=" + data;
+    int statusCode = client.put(url.c_str(), "", &response);
     if (statusCode == 200) {
       return true;
     } else {
