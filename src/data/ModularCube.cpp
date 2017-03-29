@@ -3,8 +3,9 @@
 #include <ESP8266WiFi.h>
 #include <components/MCAccelerometer/MCAccelerometer.h>
 #include <components/MCMidi/MCMidi.h>
+#include <components/MCOTA/MCOTA.h>
 #include <components/MCServer/MCServer.h>
-#include <components/WiFi/WiFiHelper.h>
+#include <components/MCWiFi/MCWiFi.h>
 #include <configuration/Configuration.h>
 
 ModularCube::ModularCube() {
@@ -21,38 +22,22 @@ ModularCube::ModularCube() {
 void ModularCube::setup() {
   Serial.begin(115200);
   Serial.println("\nSetting Up ModularCube.");
-  setUpWiFi();
-  MC_Server.begin();
+  MC_WiFi.setup();
+  MC_Server.setup();
+  MC_OTA.setup();
   Serial.println("SetUp for ModularCube done.\n");
 }
 
 void ModularCube::loop() {
+  MC_OTA.loop();
   MC_Server.loop();
   // TODO: Change the time variable to run every X seconds
   if ((millis() - t0) > 1000) {
     t0 = millis();
     currentOrientation = MC_Accelerometer.getCurrentOrientation();
-    Serial.println(String(currentOrientation));
+    Serial.println("Current Orientation: " + String(currentOrientation));
     // Serial.println(String(getJson()));
   }
-}
-
-void ModularCube::setUpWiFi() {
-  String mssid = String(String(configuration.cubes_ssid) + "_M");
-  String wifiName = WH.generateSSID();
-  String connectTo = WH.getConnectTo(wifiName);
-  WH.createWiFiAP(wifiName.c_str());
-  if (wifiName == mssid) {
-    setMaster(true);
-    if (WH.connectToWiFi(connectTo.c_str(), configuration.pass))
-      setWlan(connectTo);
-  } else {
-    if (WH.connectToWiFi(connectTo.c_str()))
-      setWlan(connectTo);
-  }
-  setAPName(wifiName);
-  setLocalIP(String(WiFi.localIP()));
-  setConnectionMode(WiFi.getMode());
 }
 
 /****************************************************************************
@@ -79,8 +64,6 @@ WiFiMode ModularCube::getConnectionMode() { return connectionMode; }
 bool ModularCube::isMaster() { return master; }
 String ModularCube::getChilds() { return childs; }
 String ModularCube::getJson() {
-  // TODO: Childs should only appear maybe on the MASTER, or maybe not. Since
-  // this network is based on a TREE Network
   return "{\"" + getAPName() + "\":{\"wlan\":\"" + getWlan() +
          "\",\"localIP\":\"" + getLocalIP() + "\",\"APName\":\"" + getAPName() +
          "\",\"currentOrientation\":\"" + getCurrentOrientation() +

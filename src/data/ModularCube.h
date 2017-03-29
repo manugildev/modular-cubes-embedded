@@ -28,7 +28,6 @@ public:
   // Other Methods
   void setup();
   void loop();
-  void setUpWiFi();
   String getJson();
 
 private:
