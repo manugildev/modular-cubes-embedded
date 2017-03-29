@@ -15,7 +15,7 @@ ModularCube::ModularCube() {
   setAPName("");
   setCurrentOrientation(0);
   setMaster(false);
-  setChilds("");
+  setChilds("{}");
 }
 
 void ModularCube::setup() {
@@ -78,7 +78,6 @@ int ModularCube::getCurrentOrientation() { return currentOrientation; }
 WiFiMode ModularCube::getConnectionMode() { return connectionMode; }
 bool ModularCube::isMaster() { return master; }
 String ModularCube::getChilds() { return childs; }
-
 String ModularCube::getJson() {
   // TODO: Childs should only appear maybe on the MASTER, or maybe not. Since
   // this network is based on a TREE Network
@@ -86,8 +85,8 @@ String ModularCube::getJson() {
          "\",\"localIP\":\"" + getLocalIP() + "\",\"APName\":\"" + getAPName() +
          "\",\"currentOrientation\":\"" + getCurrentOrientation() +
          "\",\"connectionMode\":\"" + getConnectionMode() + "\",\"master\":\"" +
-         isMaster() + "\",\"deviceId\":\"" + getDeviceId() +
-         "\",\"childs\":\"" + getChilds() + "\"}}";
+         isMaster() + "\",\"deviceId\":\"" + getDeviceId() + "\",\"childs\":" +
+         getChilds() + "}}";
 }
 
 ModularCube Cube;

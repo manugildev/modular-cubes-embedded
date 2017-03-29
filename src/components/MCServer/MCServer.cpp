@@ -6,16 +6,10 @@ ESP8266WebServer server(80);
 MCServer::MCServer() { homePage = "Hi from the server!"; }
 
 void MCServer::begin() {
-  server.on("/", HTTP_GET, []() {
-    Serial.println("ARGS:" + server.arg("data"));
-    MC_Server.handleGET();
-  });
-  server.on("/", HTTP_POST, []() { MC_Server.handlePOST(); });
-  server.on("/", HTTP_PUT, []() {
-    Serial.println("ARGS:" + server.args());
-    MC_Server.handlePUT();
-  });
-  server.on("/", HTTP_DELETE, []() { MC_Server.handleDELETE(); });
+  server.on("/get", []() { MC_Server.handleGET(); });
+  server.on("/post", []() { MC_Server.handlePOST(); });
+  server.on("/put", []() { MC_Server.handlePUT(); });
+  server.on("/delete", []() { MC_Server.handleDELETE(); });
 
   server.begin();
 }
@@ -25,29 +19,29 @@ void MCServer::handleGET() {
     server.send(200, "text/html", Cube.getJson());
   }
 }
+// Update & Create
 void MCServer::handlePUT() {
-  String message = "Number of args received: ";
-  message += server.args();
-  for (int i = 0; i < server.args(); i++) {
-    message += "Arg nº" + (String)i + " –> ";
-    message += server.argName(i) + ": ";
-    message += server.arg(i) + "\n";
+  if (!server.hasArg("data")) {
+    Serial.println("PUT Request with no argumment('data').");
+    return;
   }
-  Serial.println(message);
-
   if (Cube.isMaster()) {
-    String data = server.arg("data"); // TODO: Make this a must
-    String childs = Cube.getChilds();
+    String data = server.arg("data");
     DynamicJsonBuffer jsonBuffer;
     JsonObject &root = jsonBuffer.parseObject(Cube.getJson());
     JsonObject &element = root[Cube.getAPName()].as<JsonObject>();
-    element.printTo(Serial);
-    Serial.println();
-    JsonArray &childArray = element.createNestedArray("childs");
-    childArray.add(data); // TODO: check this
-    root.printTo(Serial);
-    Serial.println();
 
+    String childs = Cube.getChilds();
+    JsonObject &childsObject = element["childs"].as<JsonObject>();
+    JsonObject &receivedData = jsonBuffer.parseObject(data);
+    String deviceName = receivedData.begin()->key;
+    JsonObject &deviceData = receivedData[deviceName].as<JsonObject>();
+
+    // This should update the value if it does exist
+    childsObject[deviceName] = deviceData;
+    String childString;
+    childsObject.printTo(childString);
+    Cube.setChilds(childString);
     server.send(200, "text/html", Cube.getJson());
   }
 }
