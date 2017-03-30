@@ -5,6 +5,7 @@
 #include <components/MCMidi/MCMidi.h>
 #include <components/MCOTA/MCOTA.h>
 #include <components/MCServer/MCServer.h>
+#include <components/MCUDP/MCUDP.h>
 #include <components/MCWiFi/MCWiFi.h>
 #include <configuration/Configuration.h>
 
@@ -23,12 +24,15 @@ void ModularCube::setup() {
   Serial.begin(115200);
   Serial.println("\nSetting Up ModularCube.");
   MC_WiFi.setup();
+  MC_UDP.setup();
   MC_Server.setup();
   MC_OTA.setup();
   Serial.println("SetUp for ModularCube done.\n");
 }
 
 void ModularCube::loop() {
+  MC_WiFi.loop();
+  MC_UDP.loop();
   MC_OTA.loop();
   MC_Server.loop();
   // TODO: Change the time variable to run every X seconds
@@ -38,8 +42,10 @@ void ModularCube::loop() {
     Serial.println("Current Orientation: " + String(currentOrientation));
     // Serial.println(String(getJson()));
     if (!Cube.isMaster()) {
-      Serial.println(MC_Server.UPDATE(getJson()));
-      Serial.println(MC_Server.GET());
+      String msg = String(getAPName() + " - CO:" + getCurrentOrientation());
+      if (!MC_UDP.sendPacket(IPAddress(192, 168, 4, 1), msg.c_str())) {
+        Serial.println("Error sending the package");
+      }
     }
   }
 }

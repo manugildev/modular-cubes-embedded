@@ -4,6 +4,7 @@ class MCWiFi {
 public:
   // Methods
   void setup();
+  void loop();
   bool connectToWiFi(const char *ssid, const char *pass = "", int wait = 2000);
   bool checkIfWiFiExists(const char *ssid, int wait = 0);
   bool createWiFiAP(const char *ssid, const char *pass = "");

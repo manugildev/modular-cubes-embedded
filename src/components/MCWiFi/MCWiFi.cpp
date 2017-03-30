@@ -11,7 +11,6 @@ void MCWiFi::setup() {
   String connectTo = getConnectTo(wifiName);
   createWiFiAP(wifiName.c_str());
   if (wifiName == mssid) {
-    // createWiFiAP(wifiName.c_str());
     Cube.setMaster(true);
     if (connectToWiFi(connectTo.c_str(), configuration.pass, 10000))
       Cube.setWlan(connectTo);
@@ -24,6 +23,13 @@ void MCWiFi::setup() {
   Cube.setAPName(wifiName);
   Cube.setLocalIP(ipAdressToString(WiFi.localIP()));
   Cube.setConnectionMode(WiFi.getMode());
+}
+
+void MCWiFi::loop() {
+  if (!WiFi.isConnected()) {
+    Serial.println("Disconnected: Rebooting...");
+    ESP.restart();
+  }
 }
 
 // Connect to any wifi
