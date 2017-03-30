@@ -42,7 +42,7 @@ void ModularCube::loop() {
     Serial.println("Current Orientation: " + String(currentOrientation));
     // Serial.println(String(getJson()));
     if (!Cube.isMaster()) {
-      String msg = String(getAPName() + " - CO:" + getCurrentOrientation());
+      String msg = getJson();
       if (!MC_UDP.sendPacket(IPAddress(192, 168, 4, 1), msg.c_str())) {
         Serial.println("Error sending the package");
       }
@@ -83,9 +83,13 @@ String ModularCube::getJson() {
   //        isMaster() + "\",\"deviceId\":\"" + getDeviceId() + "\",\"childs\":"
   //        +
   //        getChilds() + "}}";
-
-  return "{\"" + getDeviceId() + "\":{\"currentOrientation\":\"" +
-         getCurrentOrientation() + "\",\"childs\":" + getChilds() + "}}";
+  if (isMaster()) {
+    return "{\"" + getLocalIP() + "\":{\"currentOrientation\":\"" +
+           getCurrentOrientation() + "\",\"childs\":" + getChilds() + "}}";
+  } else {
+    return "{\"" + getLocalIP() + "\":{\"currentOrientation\":\"" +
+           getCurrentOrientation() + "\"}}";
+  }
 }
 
 ModularCube Cube;

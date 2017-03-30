@@ -9,8 +9,8 @@ void MCWiFi::setup() {
   String mssid = String(String(configuration.cubes_ssid) + "_M");
   String wifiName = generateSSID();
   String connectTo = getConnectTo(wifiName);
-  createWiFiAP(wifiName.c_str());
   if (wifiName == mssid) {
+    createWiFiAP(wifiName.c_str());
     Cube.setMaster(true);
     if (connectToWiFi(connectTo.c_str(), configuration.pass, 10000))
       Cube.setWlan(connectTo);
@@ -18,7 +18,7 @@ void MCWiFi::setup() {
   } else {
     if (connectToWiFi(connectTo.c_str(), "", 10000))
       Cube.setWlan(connectTo);
-    WiFi.mode(WIFI_STA); // TODO: WTF (Connection mode makes the whole fail)
+    WiFi.mode(WIFI_STA);
   }
   Cube.setAPName(wifiName);
   Cube.setLocalIP(ipAdressToString(WiFi.localIP()));

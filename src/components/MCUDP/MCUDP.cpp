@@ -1,7 +1,7 @@
 
+#include <ArduinoJson.h>
 #include <components/MCUDP/MCUDP.h>
 #include <data/ModularCube.h>
-
 WiFiUDP udp;
 #define PACKET_MAX_SIZE 255
 const uint16_t localPort = 8266;
@@ -48,10 +48,39 @@ bool MCUDP::receivePacket() {
   if (len > 0) {
     incomingPacket[len] = 0;
   }
-  Serial.printf("  %s\n", incomingPacket);
 
-  if (Cube.isMaster())
-    sendPacket(udp.remoteIP(), replyPacket, udp.remotePort());
+  if (String(incomingPacket).length() != 0) {
+    if (Cube.isMaster())
+      savePacketToJson(String(incomingPacket));
+    Serial.printf("  %s\n", incomingPacket);
+    if (Cube.isMaster())
+      sendPacket(udp.remoteIP(), replyPacket, udp.remotePort());
+    return true;
+  }
+
+  return false;
+}
+// TODO: Turn this into a bool funciton
+void MCUDP::savePacketToJson(String data) {
+  DynamicJsonBuffer jsonBuffer;
+  JsonObject &root = jsonBuffer.parseObject(Cube.getJson());
+  JsonObject &element = root[Cube.getLocalIP()].as<JsonObject>();
+
+  String childs = Cube.getChilds();
+  JsonObject &childsObject = element["childs"].as<JsonObject>();
+  JsonObject &receivedData = jsonBuffer.parseObject(data);
+
+  if (!receivedData.success()) {
+    Serial.println("Error: MCUDP::savePacketToJson, couldn't parse the Json");
+    return;
+  }
+  // Update if the value does not exist
+  String deviceName = receivedData.begin()->key;
+  JsonObject &deviceData = receivedData[deviceName].as<JsonObject>();
+  childsObject[deviceName] = deviceData;
+  String childString;
+  childsObject.printTo(childString);
+  Cube.setChilds(childString);
 }
 
 MCUDP MC_UDP;
