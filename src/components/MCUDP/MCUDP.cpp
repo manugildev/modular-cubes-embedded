@@ -6,7 +6,7 @@ WiFiUDP udp;
 #define PACKET_MAX_SIZE 255
 const uint16_t localPort = 8266;
 char incomingPacket[PACKET_MAX_SIZE]; // buffer for incoming packets
-char replyPacket[PACKET_MAX_SIZE] = "  Message delivered.";
+char replyPacket[PACKET_MAX_SIZE] = "{\"message\":\"delivered\"}";
 
 void MCUDP::setup() {
   if (!startUdpServer()) {
@@ -50,8 +50,7 @@ bool MCUDP::receivePacket() {
   }
 
   if (String(incomingPacket).length() != 0) {
-    if (Cube.isMaster())
-      savePacketToJson(String(incomingPacket));
+    savePacketToJson(String(incomingPacket));
     Serial.printf("  %s\n", incomingPacket);
     if (Cube.isMaster())
       sendPacket(udp.remoteIP(), replyPacket, udp.remotePort());

@@ -2,6 +2,7 @@
 
 #include <ESP8266WiFi.h>
 #include <components/MCAccelerometer/MCAccelerometer.h>
+#include <components/MCMQTT/MCMQTT.h>
 #include <components/MCMidi/MCMidi.h>
 #include <components/MCOTA/MCOTA.h>
 #include <components/MCServer/MCServer.h>
@@ -25,8 +26,12 @@ void ModularCube::setup() {
   Serial.println("\nSetting Up ModularCube.");
   MC_WiFi.setup();
   MC_UDP.setup();
-  MC_Server.setup();
   MC_OTA.setup();
+
+  if (isMaster()) {
+    MC_Server.setup();
+    MC_MQTT.setup();
+  }
   Serial.println("SetUp for ModularCube done.\n");
 }
 
@@ -34,18 +39,23 @@ void ModularCube::loop() {
   MC_WiFi.loop();
   MC_UDP.loop();
   MC_OTA.loop();
-  MC_Server.loop();
+  if (isMaster()) {
+    MC_Server.loop();
+    MC_MQTT.loop();
+  }
   // TODO: Change the time variable to run every X seconds
   if ((millis() - t0) > 1000) {
     t0 = millis();
     currentOrientation = MC_Accelerometer.getCurrentOrientation();
-    Serial.println("Current Orientation: " + String(currentOrientation));
+    // Serial.println("Current Orientation: " + String(currentOrientation));
     // Serial.println(String(getJson()));
     if (!Cube.isMaster()) {
       String msg = getJson();
       if (!MC_UDP.sendPacket(IPAddress(192, 168, 4, 1), msg.c_str())) {
         Serial.println("Error sending the package");
       }
+    } else {
+      MC_MQTT.publish(currentOrientation);
     }
   }
 }
