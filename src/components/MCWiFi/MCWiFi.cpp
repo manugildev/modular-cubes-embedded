@@ -55,10 +55,8 @@ bool MCWiFi::connectToWiFi(const char *ssid, const char *pass, int wait) {
     } else if (WiFi.status() == WL_CONNECT_FAILED) {
       digitalWrite(2, LOW);
       Serial.printf("\nConnection to %s failed.\n", ssid);
-      return false;
     }
   }
-
   digitalWrite(2, LOW);
   Serial.printf("\nConnection to %s failed.\n", ssid);
   return false;

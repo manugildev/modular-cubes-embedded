@@ -10,10 +10,9 @@ public:
   void MQTT_connect();
   bool publish(String data);
 
-  bool parseResponse(String response);
-  String urlencode(String data);
-  String decode(String data);
-  unsigned char h2int(char c);
+  bool parseActivate(String response);
+  bool parseData(String response);
+  void parseSubscription();
 
 private:
 };

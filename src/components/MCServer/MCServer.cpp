@@ -1,6 +1,7 @@
 #include <ArduinoJson.h>
 #include <RestClient.h>
 #include <components/MCServer/MCServer.h>
+#include <configuration/Configuration.h>
 #include <data/ModularCube.h>
 
 ESP8266WebServer server(80);
@@ -35,7 +36,7 @@ void MCServer::handleUPDATE() {
     JsonObject &element = root[Cube.getDeviceId()].as<JsonObject>();
 
     String childs = Cube.getChilds();
-    JsonObject &childsObject = element["childs"].as<JsonObject>();
+    JsonObject &childsObject = element[CH_STRING].as<JsonObject>();
     JsonObject &receivedData = jsonBuffer.parseObject(data);
 
     if (!receivedData.success()) {

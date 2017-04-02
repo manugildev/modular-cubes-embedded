@@ -13,7 +13,7 @@ public:
   String generateSSID();
   String getConnectTo(String apssid);
   // Helper Methods
-  String ipAdressToString(const IPAddress &ipAddress);
+  static String ipAdressToString(const IPAddress &ipAddress);
 
 private:
   int maxDevicesPerAP;

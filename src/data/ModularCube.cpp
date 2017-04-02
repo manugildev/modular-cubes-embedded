@@ -36,7 +36,14 @@ void ModularCube::setup() {
   Serial.println("SetUp for ModularCube done.\n");
 }
 
+long rNumber = random(3000, 10000);
 void ModularCube::loop() {
+
+  if (isActivated())
+    digitalWrite(2, LOW);
+  else
+    digitalWrite(2, HIGH);
+
   MC_WiFi.loop();
   MC_UDP.loop();
   MC_OTA.loop();
@@ -44,14 +51,13 @@ void ModularCube::loop() {
     MC_Server.loop();
     MC_MQTT.loop();
   }
-  // TODO: Change the time variable to run every X seconds
-  if ((millis() - t0) > 1000) {
+  if ((millis() - t0) > rNumber && isActivated()) {
     t0 = millis();
+    rNumber = random(3000, 10000);
     currentOrientation = MC_Accelerometer.getCurrentOrientation();
-    // Serial.println("Current Orientation: " + String(currentOrientation));
-    // Serial.println(String(getJson()));
     if (!Cube.isMaster()) {
       String msg = getFJson();
+      // TODO: Send only if the previous state changes
       if (!MC_UDP.sendPacket(IPAddress(192, 168, 4, 1), msg.c_str())) {
         Serial.println("Error sending the package");
       }
@@ -97,11 +103,15 @@ String ModularCube::getJson() {
   //        +
   //        getChilds() + "}}";
   if (isMaster()) {
-    return "\"{\"" + getLocalIP() + "\":{\"" + CO_STRING + "\":" +
-           getCurrentOrientation() + ",\"childs\":" + getChilds() + "}}\"";
+    return "\"{\"" + getLocalIP() + "\": {\"" + DI_STRING + "\":" +
+           getDeviceId() + ",\"" + CO_STRING + "\":" + getCurrentOrientation() +
+           ", \"" + AC_STRING + "\":" + isActivated() + ", \"" + CH_STRING +
+           "\": " + getChilds() + "}}\"";
   } else {
-    return "\"{\"" + getLocalIP() + "\":{\"" + CO_STRING + "\":" +
-           getCurrentOrientation() + "}}\"";
+    return "\"{\"" + getLocalIP() + "\":{\"" + DI_STRING + "\":" +
+           getDeviceId() + ", \"" + CO_STRING + "\":" +
+           getCurrentOrientation() + ", \"" + AC_STRING + "\":" +
+           isActivated() + "}}\"";
   }
 }
 

@@ -9,7 +9,8 @@ public:
   bool receivePacket();
   bool sendPacket(const IPAddress &address, const char *msg,
                   uint16_t port = 8266);
-  void saveJsonChilds(String data);
+  void parseIncomingPacket(String data);
+  void parseJsonChilds(String data);
 
 private:
 };

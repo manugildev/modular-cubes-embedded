@@ -1,4 +1,6 @@
+#include <ESP8266WiFi.h>
 #include <components/MCMQTT/MCMQTT.h>
+#include <components/MCUDP/MCUDP.h>
 #include <configuration/Configuration.h>
 #include <data/ModularCube.h>
 
@@ -13,40 +15,81 @@ Adafruit_MQTT_Publish datafeed =
 Adafruit_MQTT_Subscribe dataSubscription =
     Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/data");
 
+Adafruit_MQTT_Subscribe activateSubscription =
+    Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/activate");
+
 void MCMQTT::setup() {
+  if (WiFi.status() == WL_CONNECTED)
+    MQTT_connect();
   // mqtt.subscribe(&dataSubscription);
-  MQTT_connect();
+  mqtt.subscribe(&activateSubscription);
 }
 
-void MCMQTT::loop() {
-  Adafruit_MQTT_Subscribe *subscription;
-  while ((subscription = mqtt.readSubscription(50))) {
-    if (subscription == &dataSubscription) {
-      Serial.print(F("  MCMQTT->Got: "));
-      Serial.println((char *)dataSubscription.lastread);
-    }
-  }
-}
+void MCMQTT::loop() { parseSubscription(); }
 
 bool MCMQTT::publish(String data) {
   if (!datafeed.publish(data.c_str())) {
-    Serial.println(F("  Failed to publish data."));
+    Serial.println(F("  MCMQTT -> Failed to publish data."));
     return false;
   } else {
-    Serial.println(F("  Data published to MQTT server."));
+    Serial.println(F("  MCMQTT -> Data published to MQTT server."));
     return true;
   }
 }
 
-bool MCMQTT::parseResponse(String response) {
+void MCMQTT::parseSubscription() {
+  Adafruit_MQTT_Subscribe *subscription;
+  while ((subscription = mqtt.readSubscription(20))) {
+    if (subscription == &dataSubscription) {
+      Serial.print(F("  MCMQTT -> Got DATA: "));
+      String response = String((char *)dataSubscription.lastread);
+      Serial.println((char *)dataSubscription.lastread);
+      parseData(response);
+    } else if (subscription == &activateSubscription) {
+      Serial.print(F("  MCMQTT -> Got ACTIVATE: "));
+      String response = String((char *)activateSubscription.lastread);
+      Serial.println((char *)activateSubscription.lastread);
+      parseActivate(response);
+    }
+  }
+}
+
+bool MCMQTT::parseActivate(String response) {
   DynamicJsonBuffer jsonBuffer;
-  response = response.substring(1, response.length() - 2);
+  response = response.substring(1, response.length() - 1);
+  JsonArray &array = jsonBuffer.parseArray(response);
+  if (array.success()) {
+    for (int i = 0; i < array.size(); i++) {
+      String deviceId = array[i][DI_STRING];
+      int activated = array[i][AC_STRING].as<int>();
+      IPAddress ip;
+      ip.fromString(array[i][LI_STRING].as<String>());
+      if (deviceId != Cube.getDeviceId()) {
+        Serial.println("  MCMQTT -> Send Activate to: " + ip.toString() +
+                       " - " + array[i].as<String>());
+        MC_UDP.sendPacket(ip, array[i].as<String>().c_str());
+      } else {
+        int activated = array[i][AC_STRING].as<int>();
+        Cube.setActivated(array[i][AC_STRING] ? true : false);
+      }
+    }
+    return true;
+  } else {
+    Serial.println("  MCMQTT:parseData, failed parsing Json Data.");
+    return false;
+  }
+  return false;
+}
+
+bool MCMQTT::parseData(String response) {
+  DynamicJsonBuffer jsonBuffer;
+  response = response.substring(1, response.length() - 1);
   JsonObject &root = jsonBuffer.parseObject(response);
   if (root.success()) {
     root.printTo(Serial);
     return true;
   } else {
-    Serial.println("Fucking error you motherfucker");
+    Serial.println("  MCMQTT:parseActivate, failed parsing Json Activate.");
     return false;
   }
   return false;
@@ -73,52 +116,6 @@ void MCMQTT::MQTT_connect() {
     }
   }
   Serial.println("MQTT Connected!");
-}
-
-String MCMQTT::urlencode(String str) {
-  String encodedString = "";
-  char c;
-  char code0;
-  char code1;
-  char code2;
-  for (int i = 0; i < str.length(); i++) {
-    c = str.charAt(i);
-    if (c == ' ') {
-      encodedString += '+';
-    } else if (isalnum(c)) {
-      encodedString += c;
-    } else {
-      code1 = (c & 0xf) + '0';
-      if ((c & 0xf) > 9) {
-        code1 = (c & 0xf) - 10 + 'A';
-      }
-      c = (c >> 4) & 0xf;
-      code0 = c + '0';
-      if (c > 9) {
-        code0 = c - 10 + 'A';
-      }
-      code2 = '\0';
-      encodedString += '%';
-      encodedString += code0;
-      encodedString += code1;
-      // encodedString+=code2;
-    }
-    yield();
-  }
-  return encodedString;
-}
-
-unsigned char MCMQTT::h2int(char c) {
-  if (c >= '0' && c <= '9') {
-    return ((unsigned char)c - '0');
-  }
-  if (c >= 'a' && c <= 'f') {
-    return ((unsigned char)c - 'a' + 10);
-  }
-  if (c >= 'A' && c <= 'F') {
-    return ((unsigned char)c - 'A' + 10);
-  }
-  return (0);
 }
 
 MCMQTT MC_MQTT;

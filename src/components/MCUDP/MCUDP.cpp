@@ -1,7 +1,11 @@
 
 #include <ArduinoJson.h>
+#include <components/MCMQTT/MCMQTT.h>
 #include <components/MCUDP/MCUDP.h>
+#include <components/MCWiFi/MCWiFi.h>
+#include <configuration/Configuration.h>
 #include <data/ModularCube.h>
+
 WiFiUDP udp;
 #define PACKET_MAX_SIZE 255
 const uint16_t localPort = 8266;
@@ -41,34 +45,47 @@ bool MCUDP::sendPacket(const IPAddress &address, const char *msg,
 }
 
 bool MCUDP::receivePacket() {
-  // receive incoming UDP packets
-  // Serial.printf("Received %d bytes from %s, port %d\n", PACKET_MAX_SIZE,
-  //               udp.remoteIP().toString().c_str(), udp.remotePort());
   int len = udp.read(incomingPacket, PACKET_MAX_SIZE);
   if (len > 0) {
     incomingPacket[len] = 0;
   }
 
   if (String(incomingPacket).length() != 0) {
-    Serial.printf("  %s\n", incomingPacket);
+    Serial.printf("  MCUDP -> New Message: %s\n", incomingPacket);
     if (Cube.isMaster()) {
       sendPacket(udp.remoteIP(), replyPacket, udp.remotePort());
-      saveJsonChilds(String(incomingPacket));
+      parseJsonChilds(String(incomingPacket));
+    } else {
+      parseIncomingPacket(String(incomingPacket));
     }
     return true;
   }
-
   return false;
 }
+
+void MCUDP::parseIncomingPacket(String data) {
+  DynamicJsonBuffer jsonBuffer;
+  JsonObject &root = jsonBuffer.parseObject(data);
+  if (root.success()) {
+    String deviceId = root[DI_STRING];
+    if (deviceId == Cube.getDeviceId()) {
+      int activated = root[AC_STRING].as<int>();
+      Cube.setActivated(root[AC_STRING] ? true : false);
+    }
+  } else {
+    Serial.println("   MCUDP::parseIncomingPacket, parsing Json failed.");
+  }
+}
+
 // TODO: Turn this into a bool funciton
-void MCUDP::saveJsonChilds(String data) {
+void MCUDP::parseJsonChilds(String data) {
   DynamicJsonBuffer jsonBuffer;
   String cubeJson = Cube.getFJson();
   // TODO: Turn this replace into a function.
   JsonObject &root = jsonBuffer.parseObject(cubeJson);
   JsonObject &element = root[Cube.getLocalIP()].as<JsonObject>();
   String childs = Cube.getChilds();
-  JsonObject &childsObject = element["childs"].as<JsonObject>();
+  JsonObject &childsObject = element[CH_STRING].as<JsonObject>();
   JsonObject &receivedData = jsonBuffer.parseObject(data);
 
   if (!receivedData.success()) {
@@ -81,9 +98,8 @@ void MCUDP::saveJsonChilds(String data) {
   childsObject[deviceName] = deviceData;
   String childString;
   childsObject.printTo(childString);
-  if (Cube.isMaster()) {
-    Cube.setChilds(childString);
-  }
+  Cube.setChilds(childString);
+  MC_MQTT.publish(Cube.getJson());
 }
 
 MCUDP MC_UDP;
