@@ -19,6 +19,7 @@ ModularCube::ModularCube() {
   setCurrentOrientation(0);
   setMaster(false);
   setChilds("{}");
+  setActivated(true);
 }
 
 void ModularCube::setup() {
@@ -67,10 +68,11 @@ void ModularCube::setDeviceID(String dI) { deviceId = dI; }
 void ModularCube::setWlan(String w) { wlan = w; }
 void ModularCube::setLocalIP(String lI) { localIP = lI; }
 void ModularCube::setAPName(String APN) { APName = APN; }
-void ModularCube::setCurrentOrientation(int cO) { currentOrientation = cO; }
-void ModularCube::setConnectionMode(WiFiMode wM) { connectionMode = wM; }
-void ModularCube::setMaster(bool m) { master = m; }
 void ModularCube::setChilds(String c) { childs = c; }
+void ModularCube::setConnectionMode(WiFiMode wM) { connectionMode = wM; }
+void ModularCube::setCurrentOrientation(int cO) { currentOrientation = cO; }
+void ModularCube::setMaster(bool m) { master = m; }
+void ModularCube::setActivated(bool a) { activated = a; }
 
 /****************************************************************************
 * GETTERS
@@ -79,10 +81,11 @@ String ModularCube::getDeviceId() { return deviceId; }
 String ModularCube::getWlan() { return wlan; }
 String ModularCube::getLocalIP() { return localIP; }
 String ModularCube::getAPName() { return APName; }
-int ModularCube::getCurrentOrientation() { return currentOrientation; }
-WiFiMode ModularCube::getConnectionMode() { return connectionMode; }
-bool ModularCube::isMaster() { return master; }
 String ModularCube::getChilds() { return childs; }
+WiFiMode ModularCube::getConnectionMode() { return connectionMode; }
+int ModularCube::getCurrentOrientation() { return currentOrientation; }
+bool ModularCube::isMaster() { return master; }
+bool ModularCube::isActivated() { return activated; }
 String ModularCube::getJson() {
   // return "{\"" + getDeviceId() + "\":{\"wlan\":\"" + getWlan() +
   //        "\",\"localIP\":\"" + getLocalIP() + "\",\"APName\":\"" +
@@ -94,10 +97,10 @@ String ModularCube::getJson() {
   //        +
   //        getChilds() + "}}";
   if (isMaster()) {
-    return "\"{\"" + getLocalIP() + "\":{\"currentOrientation\":" +
+    return "\"{\"" + getLocalIP() + "\":{\"" + CO_STRING + "\":" +
            getCurrentOrientation() + ",\"childs\":" + getChilds() + "}}\"";
   } else {
-    return "\"{\"" + getLocalIP() + "\":{\"currentOrientation\":" +
+    return "\"{\"" + getLocalIP() + "\":{\"" + CO_STRING + "\":" +
            getCurrentOrientation() + "}}\"";
   }
 }

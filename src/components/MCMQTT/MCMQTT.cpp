@@ -1,10 +1,7 @@
 #include <components/MCMQTT/MCMQTT.h>
+#include <configuration/Configuration.h>
 #include <data/ModularCube.h>
 
-#define AIO_SERVER "io.adafruit.com"
-#define AIO_SERVERPORT 1883
-#define AIO_USERNAME "gikdew"
-#define AIO_KEY "dbd315bf60794acf9a8c51bc2e19c371"
 #define MAXSC 6
 
 WiFiClient mqttClient;

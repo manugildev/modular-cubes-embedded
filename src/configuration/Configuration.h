@@ -1,21 +1,19 @@
-#define WIFI_SSID "XXXXXXXX"
-#define WIFI_PASSWORD "XXXXXXXX"
-#define CUBES_WIFI_SSID "XXXXXXXX"
-#define CUBES_WIFI_PASSWORD "XXXXXXXX"
+#define WIFI_SSID "ManuGil"
+#define WIFI_PASSWORD "0123456789"
+#define CUBES_WIFI_SSID "CubesWIFI"
+#define CUBES_WIFI_PASSWORD ""
 #define FIREBASE_HOST "XXXXXXXX"
 #define FIREBASE_AUTH "XXXXXXXX"
-#define APPLE_MIDI_SESSION "XXXXXXXX"
+#define APPLE_MIDI_SESSION "CubesMIDI"
+
+// MQTT SERVER DEFINES
+#define AIO_SERVER "io.adafruit.com"
+#define AIO_SERVERPORT 1883
+#define AIO_USERNAME "gikdew"
+#define AIO_KEY "XXXXXXXX"
+// JSON PARSER
+#define CO_STRING "currentOrientation"
+#define AC_STRING "activated"
+#define DI_STRING "deviceID"
 
 #define DEBUG true
-
-class Configuration {
-public:
-  const char *ssid = WIFI_SSID;
-  const char *pass = WIFI_PASSWORD;
-  const char *cubes_ssid = CUBES_WIFI_SSID;
-  const char *cubes_pass = CUBES_WIFI_PASSWORD;
-  const char *firebase_host = FIREBASE_HOST;
-  const char *firebase_auth = FIREBASE_AUTH;
-  const char *apple_midi_session = APPLE_MIDI_SESSION;
-};
-extern Configuration configuration;

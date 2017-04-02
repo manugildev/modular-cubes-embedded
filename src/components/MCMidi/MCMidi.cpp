@@ -14,13 +14,13 @@ MCMidi::MCMidi() {
 
 void MCMidi::setup() {
   Serial.println("\nCreating AppleMidi Session.");
-  Serial.printf(" - Session Name: %s\n", configuration.apple_midi_session);
+  Serial.printf(" - Session Name: %s\n", APPLE_MIDI_SESSION);
   IPAddress ip = WiFi.localIP();
   Serial.print(" - Host/Port: ");
   Serial.print(ip);
   Serial.println(":5004");
 
-  AppleMIDI.begin(configuration.apple_midi_session);
+  AppleMIDI.begin(APPLE_MIDI_SESSION);
   setupCallbacks();
 }
 

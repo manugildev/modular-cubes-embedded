@@ -6,13 +6,13 @@
 void MCWiFi::setup() {
   pinMode(2, OUTPUT); // Just to blink whenever is connecting
   maxDevicesPerAP = 4;
-  String mssid = String(String(configuration.cubes_ssid) + "_M");
+  String mssid = String(String(CUBES_WIFI_SSID) + "_M");
   String wifiName = generateSSID();
   String connectTo = getConnectTo(wifiName);
   if (wifiName == mssid) {
     createWiFiAP(wifiName.c_str());
     Cube.setMaster(true);
-    if (connectToWiFi(connectTo.c_str(), configuration.pass, 10000))
+    if (connectToWiFi(connectTo.c_str(), WIFI_PASSWORD, 10000))
       Cube.setWlan(connectTo);
     WiFi.mode(WIFI_AP_STA);
   } else {
@@ -99,8 +99,8 @@ bool MCWiFi::createWiFiAP(const char *ssid, const char *pass) {
 // Algorithm that generates an ssid name for the current cube based on the cubes
 // that are already around
 String MCWiFi::generateSSID() {
-  const char *mssid = String(String(configuration.cubes_ssid) + "_M").c_str();
-  String smssid = String(String(configuration.cubes_ssid) + "_M");
+  const char *mssid = String(String(CUBES_WIFI_SSID) + "_M").c_str();
+  String smssid = String(String(CUBES_WIFI_SSID) + "_M");
 
   if (!checkIfWiFiExists(mssid)) {
     Cube.setMaster(true);
@@ -114,8 +114,7 @@ String MCWiFi::generateSSID() {
     // This bucle should return the maximum index of the network
     for (int i = 0; i < n; i++) {
       String curr_ssid = WiFi.SSID(i);
-      if (curr_ssid.startsWith(configuration.cubes_ssid) &&
-          curr_ssid != smssid) {
+      if (curr_ssid.startsWith(CUBES_WIFI_SSID) && curr_ssid != smssid) {
         int number = curr_ssid.substring(curr_ssid.indexOf("_") + 1).toInt();
         Serial.printf("Number found %i\n", number);
         if (number > maxNumber) {
@@ -126,7 +125,7 @@ String MCWiFi::generateSSID() {
 
     String previous = "";
     if (maxNumber == 0) {
-      return String(String(configuration.cubes_ssid) + "_0001");
+      return String(String(CUBES_WIFI_SSID) + "_0001");
     } else {
       char buffer[4] = "";
       sprintf(buffer, "%04d", maxNumber);
@@ -158,16 +157,16 @@ String MCWiFi::generateSSID() {
       std::swap(nA[i], nA[len - i - 1]);
 
     String next = String(nA);
-    return String(String(configuration.cubes_ssid) + "_" + next);
+    return String(String(CUBES_WIFI_SSID) + "_" + next);
   }
 }
 
 // Gets the name of the network this cube should be connecting to, based on the
 // name that the generateSSID algorithm generated
 String MCWiFi::getConnectTo(String apssid) {
-  String mssid = String(String(configuration.cubes_ssid) + "_M");
+  String mssid = String(String(CUBES_WIFI_SSID) + "_M");
   if (apssid == mssid) {
-    return configuration.ssid;
+    return WIFI_SSID;
   } else {
     int start = apssid.indexOf("_") + 1;
     int end = apssid.length();
@@ -181,7 +180,7 @@ String MCWiFi::getConnectTo(String apssid) {
     String snum = String(number);
     int finalNum = snum.substring(0, snum.length() - 1).toInt();
     sprintf(buffer, "%04d", finalNum);
-    return String(String(configuration.cubes_ssid) + "_" + buffer);
+    return String(String(CUBES_WIFI_SSID) + "_" + buffer);
   }
 }
 

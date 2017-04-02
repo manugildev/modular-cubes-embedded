@@ -12,19 +12,21 @@ public:
   void setWlan(String wlan);
   void setLocalIP(String localIP);
   void setAPName(String APName);
-  void setCurrentOrientation(int currentOrientation);
-  void setConnectionMode(WiFiMode wifiMode);
-  void setMaster(bool master);
   void setChilds(String childs);
+  void setConnectionMode(WiFiMode wifiMode);
+  void setCurrentOrientation(int currentOrientation);
+  void setMaster(bool master);
+  void setActivated(bool activated);
   // Variable Getters
   String getDeviceId();
   String getWlan();
   String getLocalIP();
   String getAPName();
   String getChilds();
-  int getCurrentOrientation();
   WiFiMode getConnectionMode();
+  int getCurrentOrientation();
   bool isMaster();
+  bool isActivated();
   // Other Methods
   void setup();
   void loop();
@@ -38,10 +40,11 @@ private:
   String wlan;
   String localIP;
   String APName;
-  int currentOrientation;
-  WiFiMode connectionMode;
-  bool master;
   String childs;
+  WiFiMode connectionMode;
+  int currentOrientation;
+  bool activated;
+  bool master;
 };
 
 extern ModularCube Cube;
