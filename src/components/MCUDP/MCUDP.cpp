@@ -6,7 +6,7 @@ WiFiUDP udp;
 #define PACKET_MAX_SIZE 255
 const uint16_t localPort = 8266;
 char incomingPacket[PACKET_MAX_SIZE]; // buffer for incoming packets
-char replyPacket[PACKET_MAX_SIZE] = "{\"message\":\"delivered\"}";
+char replyPacket[PACKET_MAX_SIZE] = "{\\\"message\\\": \\\"delivered\\\"}";
 
 void MCUDP::setup() {
   if (!startUdpServer()) {
@@ -50,10 +50,11 @@ bool MCUDP::receivePacket() {
   }
 
   if (String(incomingPacket).length() != 0) {
-    savePacketToJson(String(incomingPacket));
     Serial.printf("  %s\n", incomingPacket);
-    if (Cube.isMaster())
+    if (Cube.isMaster()) {
       sendPacket(udp.remoteIP(), replyPacket, udp.remotePort());
+      savePacketToJson(String(incomingPacket));
+    }
     return true;
   }
 
@@ -62,9 +63,10 @@ bool MCUDP::receivePacket() {
 // TODO: Turn this into a bool funciton
 void MCUDP::savePacketToJson(String data) {
   DynamicJsonBuffer jsonBuffer;
-  JsonObject &root = jsonBuffer.parseObject(Cube.getJson());
+  String cubeJson = Cube.getFJson();
+  // TODO: Turn this replace into a function.
+  JsonObject &root = jsonBuffer.parseObject(cubeJson);
   JsonObject &element = root[Cube.getLocalIP()].as<JsonObject>();
-
   String childs = Cube.getChilds();
   JsonObject &childsObject = element["childs"].as<JsonObject>();
   JsonObject &receivedData = jsonBuffer.parseObject(data);
@@ -79,7 +81,9 @@ void MCUDP::savePacketToJson(String data) {
   childsObject[deviceName] = deviceData;
   String childString;
   childsObject.printTo(childString);
-  Cube.setChilds(childString);
+  if (Cube.isMaster()) {
+    Cube.setChilds(childString);
+  }
 }
 
 MCUDP MC_UDP;

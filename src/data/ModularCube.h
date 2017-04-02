@@ -29,6 +29,7 @@ public:
   void setup();
   void loop();
   String getJson();
+  String getFJson();
 
 private:
   // Variables

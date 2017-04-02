@@ -18,7 +18,7 @@ void MCServer::loop() { server.handleClient(); }
 // Get
 void MCServer::handleGET() {
   if (Cube.isMaster()) {
-    server.send(HTTP_CODE_OK, "application/json", Cube.getJson());
+    server.send(HTTP_CODE_OK, "application/json", Cube.getFJson());
   }
 }
 // Update & Create
@@ -49,12 +49,9 @@ void MCServer::handleUPDATE() {
     String childString;
     childsObject.printTo(childString);
     Cube.setChilds(childString);
-    server.send(HTTP_CODE_OK, "application/json", Cube.getJson());
+    server.send(HTTP_CODE_OK, "application/json", Cube.getFJson());
 
     // If the current cube is not the master, upload to the upper node
-    if (!Cube.isMaster()) {
-      UPDATE(Cube.getJson());
-    }
   }
 }
 

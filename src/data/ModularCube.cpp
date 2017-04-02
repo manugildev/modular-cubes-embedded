@@ -50,12 +50,12 @@ void ModularCube::loop() {
     // Serial.println("Current Orientation: " + String(currentOrientation));
     // Serial.println(String(getJson()));
     if (!Cube.isMaster()) {
-      String msg = getJson();
+      String msg = getFJson();
       if (!MC_UDP.sendPacket(IPAddress(192, 168, 4, 1), msg.c_str())) {
         Serial.println("Error sending the package");
       }
     } else {
-      MC_MQTT.publish(currentOrientation);
+      MC_MQTT.publish(getJson());
     }
   }
 }
@@ -94,12 +94,16 @@ String ModularCube::getJson() {
   //        +
   //        getChilds() + "}}";
   if (isMaster()) {
-    return "{\"" + getLocalIP() + "\":{\"currentOrientation\":\"" +
-           getCurrentOrientation() + "\",\"childs\":" + getChilds() + "}}";
+    return "\"{\"" + getLocalIP() + "\":{\"currentOrientation\":" +
+           getCurrentOrientation() + ",\"childs\":" + getChilds() + "}}\"";
   } else {
-    return "{\"" + getLocalIP() + "\":{\"currentOrientation\":\"" +
-           getCurrentOrientation() + "\"}}";
+    return "\"{\"" + getLocalIP() + "\":{\"currentOrientation\":" +
+           getCurrentOrientation() + "}}\"";
   }
+}
+
+String ModularCube::getFJson() {
+  return getJson().substring(1, getJson().length() - 1);
 }
 
 ModularCube Cube;
