@@ -67,6 +67,11 @@ void ModularCube::loop() {
   }
 }
 
+void ModularCube::reboot() {
+  Serial.println("Rebooting...");
+  ESP.restart();
+}
+
 /****************************************************************************
 * SETTERS
 ****************************************************************************/
@@ -93,15 +98,6 @@ int ModularCube::getCurrentOrientation() { return currentOrientation; }
 bool ModularCube::isMaster() { return master; }
 bool ModularCube::isActivated() { return activated; }
 String ModularCube::getJson() {
-  // return "{\"" + getDeviceId() + "\":{\"wlan\":\"" + getWlan() +
-  //        "\",\"localIP\":\"" + getLocalIP() + "\",\"APName\":\"" +
-  //        getAPName() +
-  //        "\",\"currentOrientation\":\"" + getCurrentOrientation() +
-  //        "\",\"connectionMode\":\"" + getConnectionMode() +
-  //        "\",\"master\":\"" +
-  //        isMaster() + "\",\"deviceId\":\"" + getDeviceId() + "\",\"childs\":"
-  //        +
-  //        getChilds() + "}}";
   if (isMaster()) {
     return "\"{\"" + getLocalIP() + "\": {\"" + DI_STRING + "\":" +
            getDeviceId() + ",\"" + CO_STRING + "\":" + getCurrentOrientation() +
@@ -114,7 +110,6 @@ String ModularCube::getJson() {
            isActivated() + "}}\"";
   }
 }
-
 String ModularCube::getFJson() {
   return getJson().substring(1, getJson().length() - 1);
 }

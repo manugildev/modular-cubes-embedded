@@ -10,13 +10,11 @@ WiFiUDP udp;
 #define PACKET_MAX_SIZE 255
 const uint16_t localPort = 8266;
 char incomingPacket[PACKET_MAX_SIZE]; // buffer for incoming packets
-char replyPacket[PACKET_MAX_SIZE] = "\"{\"message\": \"delivered\"}\"";
+char replyPacket[PACKET_MAX_SIZE] = "{\"message\": \"delivered\"}";
 
 void MCUDP::setup() {
   if (!startUdpServer()) {
-    // TODO: Take this to the modular cubes
-    Serial.println("Rebooting...");
-    ESP.restart();
+    Cube.reboot();
   }
 }
 
@@ -36,10 +34,9 @@ bool MCUDP::startUdpServer() {
   return true;
 }
 
-// TODO: Set the port here if it is not defined!
 bool MCUDP::sendPacket(const IPAddress &address, const char *msg,
                        uint16_t port) {
-  udp.beginPacket(address, localPort);
+  udp.beginPacket(address, port);
   udp.write(msg);
   return (udp.endPacket() == 1);
 }
@@ -63,7 +60,7 @@ bool MCUDP::receivePacket() {
   return false;
 }
 
-void MCUDP::parseIncomingPacket(String data) {
+bool MCUDP::parseIncomingPacket(String data) {
   DynamicJsonBuffer jsonBuffer;
   JsonObject &root = jsonBuffer.parseObject(data);
   if (root.success()) {
@@ -73,15 +70,15 @@ void MCUDP::parseIncomingPacket(String data) {
       Cube.setActivated(root[AC_STRING] ? true : false);
     }
   } else {
-    Serial.println("   MCUDP::parseIncomingPacket, parsing Json failed.");
+    Serial.println("  MCUDP::parseIncomingPacket, parsing Json failed.");
+    return false;
   }
+  return true;
 }
 
-// TODO: Turn this into a bool funciton
-void MCUDP::parseJsonChilds(String data) {
+bool MCUDP::parseJsonChilds(String data) {
   DynamicJsonBuffer jsonBuffer;
   String cubeJson = Cube.getFJson();
-  // TODO: Turn this replace into a function.
   JsonObject &root = jsonBuffer.parseObject(cubeJson);
   JsonObject &element = root[Cube.getLocalIP()].as<JsonObject>();
   String childs = Cube.getChilds();
@@ -90,7 +87,7 @@ void MCUDP::parseJsonChilds(String data) {
 
   if (!receivedData.success()) {
     Serial.println("Error: MCUDP::savePacketToJson, couldn't parse the Json");
-    return;
+    return false;
   }
   // Update if the value does not exist
   String deviceName = receivedData.begin()->key;
@@ -100,6 +97,7 @@ void MCUDP::parseJsonChilds(String data) {
   childsObject.printTo(childString);
   Cube.setChilds(childString);
   MC_MQTT.publish(Cube.getJson());
+  return true;
 }
 
 MCUDP MC_UDP;

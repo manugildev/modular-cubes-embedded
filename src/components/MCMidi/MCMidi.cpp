@@ -27,8 +27,7 @@ void MCMidi::setup() {
 void MCMidi::loop() {
   // Listen to incoming notes
   AppleMIDI.run();
-
-  // TODO: Change the time variable to run every X seconds
+  // TODO: Whenever the orientation changes, update the note
   if (isConnected && (millis() - t0) > 1000) {
     t0 = millis();
     int note = Cube.getCurrentOrientation();

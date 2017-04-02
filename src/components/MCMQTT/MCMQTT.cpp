@@ -19,10 +19,8 @@ Adafruit_MQTT_Subscribe activateSubscription =
     Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/activate");
 
 void MCMQTT::setup() {
-  if (WiFi.status() == WL_CONNECTED)
-    MQTT_connect();
-  // mqtt.subscribe(&dataSubscription);
   mqtt.subscribe(&activateSubscription);
+  MQTT_connect();
 }
 
 void MCMQTT::loop() { parseSubscription(); }
@@ -98,19 +96,18 @@ bool MCMQTT::parseData(String response) {
 void MCMQTT::MQTT_connect() {
   int8_t ret;
   // Stop if already connected.
-  if (mqtt.connected()) {
+  if (mqtt.connected() || WiFi.status() != WL_CONNECTED) {
     return;
   }
   Serial.print("Connecting to MQTT... ");
-  uint8_t retries = 3;
+  uint8_t retries = 4;
   while ((ret = mqtt.connect()) != 0) { // connect will return 0 for connected
     Serial.println(mqtt.connectErrorString(ret));
     Serial.println("Retrying MQTT connection in 5 seconds...");
     mqtt.disconnect();
-    delay(5000); // wait 5 seconds
+    delay(2000); // wait 5 seconds
     retries--;
     if (retries == 0) {
-      // basically die and wait for WDT to reset me
       while (1)
         ;
     }

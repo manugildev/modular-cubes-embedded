@@ -9,8 +9,8 @@ public:
   bool receivePacket();
   bool sendPacket(const IPAddress &address, const char *msg,
                   uint16_t port = 8266);
-  void parseIncomingPacket(String data);
-  void parseJsonChilds(String data);
+  bool parseIncomingPacket(String data);
+  bool parseJsonChilds(String data);
 
 private:
 };

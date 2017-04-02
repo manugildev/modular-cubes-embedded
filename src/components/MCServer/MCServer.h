@@ -8,10 +8,6 @@ public:
   void loop();
   // Requests Handlers
   void handleGET();
-  void handleUPDATE();
-  // Request Calls
-  String GET();
-  bool UPDATE(String data);
   // Error Handlers
   String parseError(String data);
 

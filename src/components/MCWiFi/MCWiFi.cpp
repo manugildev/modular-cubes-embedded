@@ -28,7 +28,7 @@ void MCWiFi::setup() {
 void MCWiFi::loop() {
   if (!WiFi.isConnected()) {
     Serial.println("Disconnected: Rebooting...");
-    ESP.restart();
+    Cube.reboot();
   }
 }
 

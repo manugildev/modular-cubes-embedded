@@ -23,6 +23,8 @@ public:
   String getLocalIP();
   String getAPName();
   String getChilds();
+  String getJson();
+  String getFJson();
   WiFiMode getConnectionMode();
   int getCurrentOrientation();
   bool isMaster();
@@ -30,8 +32,7 @@ public:
   // Other Methods
   void setup();
   void loop();
-  String getJson();
-  String getFJson();
+  void reboot();
 
 private:
   // Variables
