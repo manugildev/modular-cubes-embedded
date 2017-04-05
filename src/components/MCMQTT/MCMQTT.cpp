@@ -4,7 +4,7 @@
 #include <configuration/Configuration.h>
 #include <data/ModularCube.h>
 
-#define MAXSC 6
+#define MAXSC 8
 
 WiFiClient mqttClient;
 Adafruit_MQTT_Client mqtt(&mqttClient, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME,
@@ -28,6 +28,7 @@ void MCMQTT::loop() { parseSubscription(); }
 bool MCMQTT::publish(String data) {
   if (!datafeed.publish(data.c_str())) {
     Serial.println(F("  MCMQTT -> Failed to publish data."));
+    Serial.println(data);
     return false;
   } else {
     Serial.println(F("  MCMQTT -> Data published to MQTT server."));
@@ -58,17 +59,20 @@ bool MCMQTT::parseActivate(String response) {
   JsonArray &array = jsonBuffer.parseArray(response);
   if (array.success()) {
     for (int i = 0; i < array.size(); i++) {
-      String deviceId = array[i][DI_STRING];
+      String lIP = array[i][LI_STRING].as<String>();
       int activated = array[i][AC_STRING].as<int>();
-      IPAddress ip;
-      ip.fromString(array[i][LI_STRING].as<String>());
-      if (deviceId != Cube.getDeviceId()) {
+      IPAddress ip(192, 168, 4, array[i][LI_STRING].as<String>().toInt());
+      if (lIP != Cube.getLocalIP()) {
         Serial.println("  MCMQTT -> Send Activate to: " + ip.toString() +
                        " - " + array[i].as<String>());
         MC_UDP.sendPacket(ip, array[i].as<String>().c_str());
       } else {
         int activated = array[i][AC_STRING].as<int>();
         Cube.setActivated(array[i][AC_STRING] ? true : false);
+        Serial.println("  MCMQTT -> Set Activate: " +
+                       String(Cube.isActivated()));
+        if (!array[i][AC_STRING])
+          publish(Cube.getJson());
       }
     }
     return true;

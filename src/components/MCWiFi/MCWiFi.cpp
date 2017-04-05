@@ -15,13 +15,16 @@ void MCWiFi::setup() {
     if (connectToWiFi(connectTo.c_str(), WIFI_PASSWORD, 10000))
       Cube.setWlan(connectTo);
     WiFi.mode(WIFI_AP_STA);
+    IPAddress ip = WiFi.softAPIP();
+    Cube.setLocalIP(String(ip[3]));
   } else {
     if (connectToWiFi(connectTo.c_str(), "", 10000))
       Cube.setWlan(connectTo);
     WiFi.mode(WIFI_STA);
+    IPAddress ip = WiFi.localIP();
+    Cube.setLocalIP(String(ip[3]));
   }
   Cube.setAPName(wifiName);
-  Cube.setLocalIP(ipAdressToString(WiFi.localIP()));
   Cube.setConnectionMode(WiFi.getMode());
 }
 

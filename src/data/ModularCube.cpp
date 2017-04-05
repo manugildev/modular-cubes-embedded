@@ -23,6 +23,7 @@ ModularCube::ModularCube() {
 }
 
 void ModularCube::setup() {
+  // TODO: Random time depending on the board
   Serial.begin(115200);
   Serial.println("\nSetting Up ModularCube.");
   MC_WiFi.setup();
@@ -99,15 +100,13 @@ bool ModularCube::isMaster() { return master; }
 bool ModularCube::isActivated() { return activated; }
 String ModularCube::getJson() {
   if (isMaster()) {
-    return "\"{\"" + getLocalIP() + "\": {\"" + DI_STRING + "\":" +
-           getDeviceId() + ",\"" + CO_STRING + "\":" + getCurrentOrientation() +
-           ", \"" + AC_STRING + "\":" + isActivated() + ", \"" + CH_STRING +
-           "\": " + getChilds() + "}}\"";
+    return "\"{\"" + getLocalIP() + "\":{\"" + CO_STRING + "\":" +
+           getCurrentOrientation() + ",\"" + AC_STRING + "\":" + isActivated() +
+           ",\"" + CH_STRING + "\":" + getChilds() + "}}\"";
   } else {
-    return "\"{\"" + getLocalIP() + "\":{\"" + DI_STRING + "\":" +
-           getDeviceId() + ", \"" + CO_STRING + "\":" +
-           getCurrentOrientation() + ", \"" + AC_STRING + "\":" +
-           isActivated() + "}}\"";
+    return "\"{\"" + getLocalIP() + "\":{\"" + CO_STRING + "\":" +
+           getCurrentOrientation() + ",\"" + AC_STRING + "\":" + isActivated() +
+           "}}\"";
   }
 }
 String ModularCube::getFJson() {

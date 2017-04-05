@@ -64,10 +64,14 @@ bool MCUDP::parseIncomingPacket(String data) {
   DynamicJsonBuffer jsonBuffer;
   JsonObject &root = jsonBuffer.parseObject(data);
   if (root.success()) {
-    String deviceId = root[DI_STRING];
-    if (deviceId == Cube.getDeviceId()) {
+    String lIP = root[LI_STRING];
+    if (lIP == Cube.getLocalIP()) {
       int activated = root[AC_STRING].as<int>();
       Cube.setActivated(root[AC_STRING] ? true : false);
+      String msg = Cube.getFJson();
+      if (!MC_UDP.sendPacket(IPAddress(192, 168, 4, 1), msg.c_str())) {
+        Serial.println("Error sending the package");
+      }
     }
   } else {
     Serial.println("  MCUDP::parseIncomingPacket, parsing Json failed.");
