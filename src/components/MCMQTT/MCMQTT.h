@@ -1,5 +1,3 @@
-#include <Adafruit_MQTT.h>
-#include <Adafruit_MQTT_Client.h>
 #include <ArduinoJson.h>
 #include <ESP8266WiFi.h>
 
@@ -7,8 +5,9 @@ class MCMQTT {
 public:
   void setup();
   void loop();
-  void MQTT_connect();
-  bool publish(String data);
+  void reconnect();
+  bool publish(String topic, String data);
+  bool subscribe(String topic);
 
   bool parseActivate(String response);
   bool parseData(String response);

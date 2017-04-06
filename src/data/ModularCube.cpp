@@ -57,13 +57,13 @@ void ModularCube::loop() {
     rNumber = random(3000, 10000);
     currentOrientation = MC_Accelerometer.getCurrentOrientation();
     if (!Cube.isMaster()) {
-      String msg = getFJson();
+      String msg = getJson();
       // TODO: Send only if the previous state changes
       if (!MC_UDP.sendPacket(IPAddress(192, 168, 4, 1), msg.c_str())) {
         Serial.println("Error sending the package");
       }
     } else {
-      MC_MQTT.publish(getJson());
+      MC_MQTT.publish(MQTT_TOPIC_DATA, getJson());
     }
   }
 }
@@ -100,17 +100,14 @@ bool ModularCube::isMaster() { return master; }
 bool ModularCube::isActivated() { return activated; }
 String ModularCube::getJson() {
   if (isMaster()) {
-    return "\"{\"" + getLocalIP() + "\":{\"" + CO_STRING + "\":" +
+    return "{\"" + getLocalIP() + "\":{\"" + CO_STRING + "\":" +
            getCurrentOrientation() + ",\"" + AC_STRING + "\":" + isActivated() +
-           ",\"" + CH_STRING + "\":" + getChilds() + "}}\"";
+           ",\"" + CH_STRING + "\":" + getChilds() + "}}";
   } else {
-    return "\"{\"" + getLocalIP() + "\":{\"" + CO_STRING + "\":" +
+    return "{\"" + getLocalIP() + "\":{\"" + CO_STRING + "\":" +
            getCurrentOrientation() + ",\"" + AC_STRING + "\":" + isActivated() +
-           "}}\"";
+           "}}";
   }
-}
-String ModularCube::getFJson() {
-  return getJson().substring(1, getJson().length() - 1);
 }
 
 ModularCube Cube;

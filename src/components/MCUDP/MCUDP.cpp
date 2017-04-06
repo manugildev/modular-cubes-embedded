@@ -68,7 +68,7 @@ bool MCUDP::parseIncomingPacket(String data) {
     if (lIP == Cube.getLocalIP()) {
       int activated = root[AC_STRING].as<int>();
       Cube.setActivated(root[AC_STRING] ? true : false);
-      String msg = Cube.getFJson();
+      String msg = Cube.getJson();
       if (!MC_UDP.sendPacket(IPAddress(192, 168, 4, 1), msg.c_str())) {
         Serial.println("Error sending the package");
       }
@@ -82,7 +82,7 @@ bool MCUDP::parseIncomingPacket(String data) {
 
 bool MCUDP::parseJsonChilds(String data) {
   DynamicJsonBuffer jsonBuffer;
-  String cubeJson = Cube.getFJson();
+  String cubeJson = Cube.getJson();
   JsonObject &root = jsonBuffer.parseObject(cubeJson);
   JsonObject &element = root[Cube.getLocalIP()].as<JsonObject>();
   String childs = Cube.getChilds();
@@ -100,7 +100,7 @@ bool MCUDP::parseJsonChilds(String data) {
   String childString;
   childsObject.printTo(childString);
   Cube.setChilds(childString);
-  MC_MQTT.publish(Cube.getJson());
+  MC_MQTT.publish(MQTT_TOPIC_DATA, Cube.getJson());
   return true;
 }
 

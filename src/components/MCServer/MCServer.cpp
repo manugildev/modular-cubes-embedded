@@ -18,7 +18,7 @@ void MCServer::loop() { server.handleClient(); }
 // Get
 void MCServer::handleGET() {
   if (Cube.isMaster()) {
-    server.send(HTTP_CODE_OK, "application/json", Cube.getFJson());
+    server.send(HTTP_CODE_OK, "application/json", Cube.getJson());
   }
 }
 

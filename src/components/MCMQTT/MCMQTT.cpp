@@ -1,32 +1,53 @@
 #include <ESP8266WiFi.h>
+#include <PubSubClient.h>
 #include <components/MCMQTT/MCMQTT.h>
 #include <components/MCUDP/MCUDP.h>
 #include <configuration/Configuration.h>
 #include <data/ModularCube.h>
 
-#define MAXSC 8
-
-WiFiClient mqttClient;
-Adafruit_MQTT_Client mqtt(&mqttClient, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME,
-                          AIO_USERNAME, AIO_KEY);
-Adafruit_MQTT_Publish datafeed =
-    Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/data");
-
-Adafruit_MQTT_Subscribe dataSubscription =
-    Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/data");
-
-Adafruit_MQTT_Subscribe activateSubscription =
-    Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/activate");
+WiFiClient espClient;
+PubSubClient mqttClient(espClient);
 
 void MCMQTT::setup() {
-  mqtt.subscribe(&activateSubscription);
-  MQTT_connect();
+  mqttClient.setServer(MQTT_SERVER, 1883);
+  mqttClient.setCallback([&](char *topic, byte *payload, unsigned int length) {
+    payload[length] = '\0';
+    String response = String((char *)payload);
+    if (String(topic) == MQTT_TOPIC_DATA) {
+      Serial.print(F("  MCMQTT -> Got DATA: "));
+      Serial.println(response);
+      parseData(response);
+    } else if (String(topic) == MQTT_TOPIC_ACTIVATE) {
+      Serial.print(F("  MCMQTT -> Got ACTIVATE: "));
+      Serial.println(response);
+      parseActivate(response);
+    }
+  });
 }
 
-void MCMQTT::loop() { parseSubscription(); }
+void MCMQTT::loop() {
+  if (!mqttClient.connected())
+    reconnect();
+  mqttClient.loop();
+}
 
-bool MCMQTT::publish(String data) {
-  if (!datafeed.publish(data.c_str())) {
+void MCMQTT::reconnect() {
+  while (!mqttClient.connected()) {
+    Serial.print("Connecting to MQTT... ");
+    if (mqttClient.connect("ESP8266 Client")) {
+      Serial.println("MQTT Connected!");
+      mqttClient.subscribe(MQTT_TOPIC_ACTIVATE);
+    } else {
+      Serial.print("failed, rc=");
+      Serial.println(mqttClient.state());
+      Serial.println("Retrying MQTT connection in 5 seconds...");
+      delay(5000);
+    }
+  }
+}
+
+bool MCMQTT::publish(String topic, String data) {
+  if (!mqttClient.publish(topic.c_str(), data.c_str())) {
     Serial.println(F("  MCMQTT -> Failed to publish data."));
     Serial.println(data);
     return false;
@@ -36,26 +57,8 @@ bool MCMQTT::publish(String data) {
   }
 }
 
-void MCMQTT::parseSubscription() {
-  Adafruit_MQTT_Subscribe *subscription;
-  while ((subscription = mqtt.readSubscription(20))) {
-    if (subscription == &dataSubscription) {
-      Serial.print(F("  MCMQTT -> Got DATA: "));
-      String response = String((char *)dataSubscription.lastread);
-      Serial.println((char *)dataSubscription.lastread);
-      parseData(response);
-    } else if (subscription == &activateSubscription) {
-      Serial.print(F("  MCMQTT -> Got ACTIVATE: "));
-      String response = String((char *)activateSubscription.lastread);
-      Serial.println((char *)activateSubscription.lastread);
-      parseActivate(response);
-    }
-  }
-}
-
 bool MCMQTT::parseActivate(String response) {
   DynamicJsonBuffer jsonBuffer;
-  response = response.substring(1, response.length() - 1);
   JsonArray &array = jsonBuffer.parseArray(response);
   if (array.success()) {
     for (int i = 0; i < array.size(); i++) {
@@ -72,7 +75,7 @@ bool MCMQTT::parseActivate(String response) {
         Serial.println("  MCMQTT -> Set Activate: " +
                        String(Cube.isActivated()));
         if (!array[i][AC_STRING])
-          publish(Cube.getJson());
+          publish(MQTT_TOPIC_DATA, Cube.getJson().c_str());
       }
     }
     return true;
@@ -85,7 +88,6 @@ bool MCMQTT::parseActivate(String response) {
 
 bool MCMQTT::parseData(String response) {
   DynamicJsonBuffer jsonBuffer;
-  response = response.substring(1, response.length() - 1);
   JsonObject &root = jsonBuffer.parseObject(response);
   if (root.success()) {
     root.printTo(Serial);
@@ -95,28 +97,6 @@ bool MCMQTT::parseData(String response) {
     return false;
   }
   return false;
-}
-
-void MCMQTT::MQTT_connect() {
-  int8_t ret;
-  // Stop if already connected.
-  if (mqtt.connected() || WiFi.status() != WL_CONNECTED) {
-    return;
-  }
-  Serial.print("Connecting to MQTT... ");
-  uint8_t retries = 4;
-  while ((ret = mqtt.connect()) != 0) { // connect will return 0 for connected
-    Serial.println(mqtt.connectErrorString(ret));
-    Serial.println("Retrying MQTT connection in 5 seconds...");
-    mqtt.disconnect();
-    delay(2000); // wait 5 seconds
-    retries--;
-    if (retries == 0) {
-      while (1)
-        ;
-    }
-  }
-  Serial.println("MQTT Connected!");
 }
 
 MCMQTT MC_MQTT;
