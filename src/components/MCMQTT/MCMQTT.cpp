@@ -34,7 +34,7 @@ void MCMQTT::loop() {
 void MCMQTT::reconnect() {
   while (!mqttClient.connected()) {
     Serial.print("Connecting to MQTT... ");
-    if (mqttClient.connect("ESP8266 Client")) {
+    if (mqttClient.connect("ESP8266 Client", MQTT_TOPIC_DATA, 0, 0, "{}")) {
       Serial.println("MQTT Connected!");
       mqttClient.subscribe(MQTT_TOPIC_ACTIVATE);
     } else {
