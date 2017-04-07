@@ -2,7 +2,6 @@
 
 #include <ESP8266WiFi.h>
 #include <components/MCAccelerometer/MCAccelerometer.h>
-#include <components/MCEasyMesh/MCEasyMesh.h>
 #include <components/MCMQTT/MCMQTT.h>
 #include <components/MCMidi/MCMidi.h>
 #include <components/MCOTA/MCOTA.h>
