@@ -2,6 +2,7 @@
 
 #include <ESP8266WiFi.h>
 #include <components/MCAccelerometer/MCAccelerometer.h>
+#include <components/MCEasyMesh/MCEasyMesh.h>
 #include <components/MCMQTT/MCMQTT.h>
 #include <components/MCMidi/MCMidi.h>
 #include <components/MCOTA/MCOTA.h>
@@ -26,6 +27,8 @@ void ModularCube::setup() {
   // TODO: Random time depending on the board
   Serial.begin(115200);
   Serial.println("\nSetting Up ModularCube.");
+
+  // MC_EasyMesh.setup();
   MC_WiFi.setup();
   MC_UDP.setup();
   MC_OTA.setup();
@@ -45,11 +48,11 @@ void ModularCube::loop() {
   else
     digitalWrite(2, HIGH);
 
+  // MC_EasyMesh.loop();
   MC_WiFi.loop();
   MC_UDP.loop();
   MC_OTA.loop();
   if (isMaster()) {
-    MC_Server.loop();
     MC_MQTT.loop();
   }
   if ((millis() - t0) > rNumber && isActivated()) {
