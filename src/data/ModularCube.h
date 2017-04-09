@@ -8,7 +8,7 @@ public:
   // Constructor
   ModularCube();
   // Variable Setters
-  void setDeviceID(String deviceId);
+  void setDeviceID(int deviceId);
   void setWlan(String wlan);
   void setLocalIP(String localIP);
   void setAPName(String APName);
@@ -18,7 +18,7 @@ public:
   void setMaster(bool master);
   void setActivated(bool activated);
   // Variable Getters
-  String getDeviceId();
+  int getDeviceId();
   String getWlan();
   String getLocalIP();
   String getAPName();
@@ -33,11 +33,12 @@ public:
   void setup();
   void loop();
   void reboot();
+  void ledLoop();
 
 private:
   // Variables
   unsigned int t0;
-  String deviceId;
+  int deviceId;
   String wlan;
   String localIP;
   String APName;

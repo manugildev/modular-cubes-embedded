@@ -1,7 +1,7 @@
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 #include <components/MCMQTT/MCMQTT.h>
-#include <components/MCUDP/MCUDP.h>
+#include <components/MCMesh/MCMesh.h>
 #include <configuration/Configuration.h>
 #include <data/ModularCube.h>
 
@@ -63,12 +63,10 @@ bool MCMQTT::parseActivate(String response) {
   if (array.success()) {
     for (int i = 0; i < array.size(); i++) {
       String lIP = array[i][LI_STRING].as<String>();
-      int activated = array[i][AC_STRING].as<int>();
-      IPAddress ip(192, 168, 4, array[i][LI_STRING].as<String>().toInt());
-      if (lIP != Cube.getLocalIP()) {
-        Serial.println("  MCMQTT -> Send Activate to: " + ip.toString() +
-                       " - " + array[i].as<String>());
-        MC_UDP.sendPacket(ip, array[i].as<String>().c_str());
+      if (lIP.toInt() != Cube.getDeviceId()) {
+        Serial.println("  MCMQTT -> Send Activate to: " + lIP + " - " +
+                       array[i].as<String>());
+        MC_Mesh.publish(lIP.toInt(), array[i].as<String>());
       } else {
         int activated = array[i][AC_STRING].as<int>();
         Cube.setActivated(array[i][AC_STRING] ? true : false);
