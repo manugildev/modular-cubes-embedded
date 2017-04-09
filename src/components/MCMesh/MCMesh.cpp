@@ -19,11 +19,11 @@ void MCMesh::loop() { mesh.update(); }
 
 void MCMesh::setUpCallbacks() {
   mesh.onNewConnection([](uint32_t nodeId) {
-    Serial.printf("  MCMesh -> New Connection, nodeId = %u\n", nodeId);
+    // Serial.printf("  MCMesh -> New Connection, nodeId = %u\n", nodeId);
   });
   mesh.onReceive([&](uint32_t from, String &msg) {
-    Serial.printf("  MCMesh -> New Message, nodeId = %u, msg = %s\n", from,
-                  msg.c_str());
+    // Serial.printf("  MCMesh -> New Message, nodeId = %u, msg = %s\n", from,
+    // msg.c_str());
     if (Cube.isMaster()) {
       parseJsonChilds(msg);
     } else {
@@ -40,21 +40,21 @@ void MCMesh::publishToAll(String msg) { mesh.sendBroadcast(msg); }
 
 void MCMesh::setMasterIfMeshDoesNotExist() {
   if (checkIfMeshExists(MESH_PREFIX)) {
-    Serial.println("MCMesh -> Mesh FOUND");
+    // Serial.println("MCMesh -> Mesh FOUND");
     Cube.setMaster(false);
   } else {
-    Serial.println("MCMesh -> Mesh NOT FOUND");
+    // Serial.println("MCMesh -> Mesh NOT FOUND");
     Cube.setMaster(true);
   }
 }
 
 bool MCMesh::checkIfMeshExists(const char *ssid, int wait) {
-  Serial.printf("Trying to find %s...\n", ssid);
+  // Serial.printf("Trying to find %s...\n", ssid);
   int tries = 0;
   int maxTries = (wait / 10) + 1;
   while (tries < maxTries) {
     int n = WiFi.scanNetworks();
-    Serial.printf("%i network(s) found. ", n);
+    // Serial.printf("%i network(s) found. ", n);
     for (int i = 0; i < n; i++) {
       if (WiFi.SSID(i) == ssid) {
         return true;
@@ -76,7 +76,8 @@ bool MCMesh::parseJsonChilds(String data) {
   JsonObject &receivedData = jsonBuffer.parseObject(data);
 
   if (!receivedData.success()) {
-    Serial.println("Error: MCUDP::savePacketToJson, couldn't parse the Json");
+    // Serial.println("Error: MCUDP::savePacketToJson, couldn't parse the
+    // Json");
     return false;
   }
   // Update if the value does not exist
@@ -103,7 +104,7 @@ bool MCMesh::parseIncomingPacket(uint32_t master, String data) {
       publish(master, msg);
     }
   } else {
-    Serial.println("  MCMesh::parseIncomingPacket, parsing Json failed.");
+    // Serial.println("  MCMesh::parseIncomingPacket, parsing Json failed.");
     return false;
   }
   return true;

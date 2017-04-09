@@ -28,13 +28,13 @@ ModularCube::ModularCube() {
 void ModularCube::setup() {
   pinMode(2, OUTPUT);
   Serial.begin(115200);
-  Serial.println("\nSetting Up ModularCube.");
+  // Serial.println("\nSetting Up ModularCube.");
   MC_Mesh.setup();
   if (isMaster()) {
     MC_WiFi.connectToWiFi(WIFI_SSID, WIFI_PASSWORD);
     MC_MQTT.setup();
   }
-  Serial.println("SetUp for ModularCube done.\n");
+  // Serial.println("SetUp for ModularCube done.\n");
 }
 
 /****************************************************************************
@@ -57,7 +57,7 @@ void ModularCube::loop() {
       MC_Mesh.publishToAll(msg);
       // TODO: Send only if the previous state changes
       // if (!MC_UDP.sendPacket(IPAddress(192, 168, 4, 1), msg.c_str())) {
-      //   Serial.println("Error sending the package");
+      //   // Serial.println("Error sending the package");
       // }
     } else {
       MC_MQTT.publish(MQTT_TOPIC_DATA, getJson());
@@ -75,7 +75,7 @@ void ModularCube::ledLoop() {
     digitalWrite(2, HIGH);
 }
 void ModularCube::reboot() {
-  Serial.println("Rebooting...");
+  // Serial.println("Rebooting...");
   ESP.restart();
 }
 

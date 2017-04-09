@@ -26,11 +26,11 @@ void MCUDP::loop() {
 
 bool MCUDP::startUdpServer() {
   if (!udp.begin(localPort)) {
-    Serial.println("Error starting UDP server!");
+    // Serial.println("Error starting UDP server!");
     return false;
   }
-  Serial.print("UDP server started on port ");
-  Serial.println(udp.localPort());
+  // Serial.print("UDP server started on port ");
+  // Serial.println(udp.localPort());
   return true;
 }
 
@@ -48,7 +48,7 @@ bool MCUDP::receivePacket() {
   }
 
   if (String(incomingPacket).length() != 0) {
-    Serial.printf("  MCUDP -> New Message: %s\n", incomingPacket);
+    // Serial.printf("  MCUDP -> New Message: %s\n", incomingPacket);
     if (Cube.isMaster()) {
       sendPacket(udp.remoteIP(), replyPacket, udp.remotePort());
       parseJsonChilds(String(incomingPacket));
@@ -70,11 +70,11 @@ bool MCUDP::parseIncomingPacket(String data) {
       Cube.setActivated(root[AC_STRING] ? true : false);
       String msg = Cube.getJson();
       if (!MC_UDP.sendPacket(IPAddress(192, 168, 4, 1), msg.c_str())) {
-        Serial.println("Error sending the package");
+        // Serial.println("Error sending the package");
       }
     }
   } else {
-    Serial.println("  MCUDP::parseIncomingPacket, parsing Json failed.");
+    // Serial.println("  MCUDP::parseIncomingPacket, parsing Json failed.");
     return false;
   }
   return true;
@@ -90,7 +90,8 @@ bool MCUDP::parseJsonChilds(String data) {
   JsonObject &receivedData = jsonBuffer.parseObject(data);
 
   if (!receivedData.success()) {
-    Serial.println("Error: MCUDP::savePacketToJson, couldn't parse the Json");
+    // Serial.println("Error: MCUDP::savePacketToJson, couldn't parse the
+    // Json");
     return false;
   }
   // Update if the value does not exist
