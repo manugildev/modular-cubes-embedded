@@ -30,7 +30,7 @@ void MCWiFi::setup() {
 
 void MCWiFi::loop() {
   if (!WiFi.isConnected()) {
-    Serial.println("Disconnected: Rebooting...");
+    // Serial.println("Disconnected: Rebooting...");
     Cube.reboot();
   }
 }
@@ -38,36 +38,36 @@ void MCWiFi::loop() {
 // Connect to any wifi
 bool MCWiFi::connectToWiFi(const char *ssid, const char *pass, int wait) {
   WiFi.begin(ssid, pass);
-  Serial.printf("\nConnecting to %s ", ssid);
+  // Serial.printf("\nConnecting to %s ", ssid);
   int tries = 0;
   int maxTries = (wait / 100) + 1;
   // We try to connect for X times, if it doesn't work we just stop
   while (tries < maxTries) {
     if (WiFi.status() != WL_CONNECTED) {
-      Serial.print(".");
+      // Serial.print(".");
       digitalWrite(2, LOW);
       delay(50);
       digitalWrite(2, HIGH);
       delay(50);
       tries++;
     } else if (WiFi.status() == WL_CONNECTED) {
-      Serial.printf("\nConnected to %s\n", ssid);
-      Serial.print("Local IP: ");
-      Serial.println(WiFi.localIP());
+      // Serial.printf("\nConnected to %s\n", ssid);
+      // Serial.print("Local IP: ");
+      // Serial.println(WiFi.localIP());
       return true;
     } else if (WiFi.status() == WL_CONNECT_FAILED) {
       digitalWrite(2, LOW);
-      Serial.printf("\nConnection to %s failed.\n", ssid);
+      // Serial.printf("\nConnection to %s failed.\n", ssid);
     }
   }
   digitalWrite(2, LOW);
-  Serial.printf("\nConnection to %s failed.\n", ssid);
+  // Serial.printf("\nConnection to %s failed.\n", ssid);
   return false;
 }
 
 // Checks if the wifi passed in the parameters exist, returns true or false
 bool MCWiFi::checkIfWiFiExists(const char *ssid, int wait) {
-  Serial.printf("Trying to find %s...\n", ssid);
+  // Serial.printf("Trying to find %s...\n", ssid);
   int tries = 0;
   int maxTries = (wait / 10) + 1;
   // We set the WiFi to Station Mode and Disconnect from any other WiFi
@@ -75,26 +75,26 @@ bool MCWiFi::checkIfWiFiExists(const char *ssid, int wait) {
   WiFi.disconnect();
   while (tries < maxTries) {
     int n = WiFi.scanNetworks();
-    Serial.printf("%i - %i network(s) found. ", tries, n);
+    // Serial.printf("%i - %i network(s) found. ", tries, n);
     for (int i = 0; i < n; i++) {
       if (WiFi.SSID(i) == ssid) {
         return true;
       }
     }
-    Serial.printf("%s Not found.\n", ssid);
+    // Serial.printf("%s Not found.\n", ssid);
     delay(10);
     tries++;
   }
-  Serial.printf("After %i tries %s could not be found.\n", tries, ssid);
+  // Serial.printf("After %i tries %s could not be found.\n", tries, ssid);
   return false;
 }
 
 // Creates WiFi Hotspot
 bool MCWiFi::createWiFiAP(const char *ssid, const char *pass) {
-  Serial.printf("Starting Access Point: %s\n", ssid);
+  // Serial.printf("Starting Access Point: %s\n", ssid);
   WiFi.softAP(ssid, pass);
   String ip = WiFi.softAPIP().toString();
-  Serial.printf("AP IP adress: %s", ip.c_str());
+  // Serial.printf("AP IP adress: %s", ip.c_str());
 }
 
 // Algorithm that generates an ssid name for the current cube based on the cubes
@@ -111,13 +111,13 @@ String MCWiFi::generateSSID() {
     WiFi.disconnect();
     int n = WiFi.scanNetworks();
     int maxNumber = 0;
-    Serial.printf("%i network(s) found. \n", n);
+    // Serial.printf("%i network(s) found. \n", n);
     // This bucle should return the maximum index of the network
     for (int i = 0; i < n; i++) {
       String curr_ssid = WiFi.SSID(i);
       if (curr_ssid.startsWith(CUBES_WIFI_SSID) && curr_ssid != smssid) {
         int number = curr_ssid.substring(curr_ssid.indexOf("_") + 1).toInt();
-        Serial.printf("Number found %i\n", number);
+        // Serial.printf("Number found %i\n", number);
         if (number > maxNumber) {
           maxNumber = number;
         }
