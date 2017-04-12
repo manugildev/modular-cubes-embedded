@@ -4,6 +4,8 @@
 class MCMesh {
 public:
   int t0;
+  painlessMesh mesh;
+
   void setup();
   void loop();
   void setUpCallbacks();

@@ -1,6 +1,7 @@
 
 #include <ArduinoJson.h>
 #include <components/MCMQTT/MCMQTT.h>
+#include <components/MCMesh/MCMesh.h>
 #include <components/MCUDP/MCUDP.h>
 #include <components/MCWiFi/MCWiFi.h>
 #include <configuration/Configuration.h>
@@ -26,11 +27,11 @@ void MCUDP::loop() {
 
 bool MCUDP::startUdpServer() {
   if (!udp.begin(localPort)) {
-    // Serial.println("Error starting UDP server!");
+    Serial.println("Error starting UDP server!");
     return false;
   }
-  // Serial.print("UDP server started on port ");
-  // Serial.println(udp.localPort());
+  Serial.print("UDP server started on port ");
+  Serial.println(udp.localPort());
   return true;
 }
 
@@ -48,61 +49,68 @@ bool MCUDP::receivePacket() {
   }
 
   if (String(incomingPacket).length() != 0) {
-    // Serial.printf("  MCUDP -> New Message: %s\n", incomingPacket);
+    String ip = udp.remoteIP().toString() + ":" + udp.remotePort();
+    Serial.printf("  MCUDP -> New Message: %s, from %s\n", incomingPacket,
+                  ip.c_str());
     if (Cube.isMaster()) {
-      sendPacket(udp.remoteIP(), replyPacket, udp.remotePort());
-      parseJsonChilds(String(incomingPacket));
+      // This is for the firs message the app sends
+      if (String(incomingPacket).indexOf("android") != -1) {
+        // sendPacket(udp.remoteIP(), replyPacket, udp.remotePort());
+        parseAndroidPacket(udp.remoteIP(), udp.remotePort(),
+                           String(incomingPacket));
+        String msg = "data=" + Cube.getJson();
+        MC_UDP.sendPacket(MC_UDP.androidIP, msg.c_str(), MC_UDP.androidPort);
+      } else {
+        parseAndroidPacket(udp.remoteIP(), udp.remotePort(),
+                           String(incomingPacket));
+        // sendPacket(udp.remoteIP(), replyPacket, udp.remotePort());
+      }
+      // parseJsonChilds(String(incomingPacket));
     } else {
-      parseIncomingPacket(String(incomingPacket));
+      // Only if master, for sure
+      // sendPacket(udp.remoteIP(), replyPacket, udp.remotePort());
+      // parseIncomingPacket(String(incomingPacket));
     }
     return true;
   }
   return false;
 }
 
-bool MCUDP::parseIncomingPacket(String data) {
+bool MCUDP::parseActivate(String response) {
   DynamicJsonBuffer jsonBuffer;
-  JsonObject &root = jsonBuffer.parseObject(data);
-  if (root.success()) {
-    String lIP = root[LI_STRING];
-    if (lIP == Cube.getLocalIP()) {
-      int activated = root[AC_STRING].as<int>();
-      Cube.setActivated(root[AC_STRING] ? true : false);
-      String msg = Cube.getJson();
-      if (!MC_UDP.sendPacket(IPAddress(192, 168, 4, 1), msg.c_str())) {
-        // Serial.println("Error sending the package");
+  JsonArray &array = jsonBuffer.parseArray(response);
+  if (array.success()) {
+    for (int i = 0; i < array.size(); i++) {
+      String lIP = array[i][LI_STRING].as<String>();
+      if (lIP.toInt() != Cube.getDeviceId()) {
+        Serial.println("  MCUDP -> Send Activate to: " + lIP + " - " +
+                       array[i].as<String>());
+        MC_Mesh.publish(lIP.toInt(), array[i].as<String>());
+      } else {
+        int activated = array[i][AC_STRING].as<int>();
+        Cube.setActivated(array[i][AC_STRING] ? true : false);
+        Serial.println("  MCUDP -> Set Activate: " +
+                       String(Cube.isActivated()));
+        String msg = "data=" + Cube.getJson();
+        sendPacket(androidIP, msg.c_str(), androidPort);
       }
     }
+    return true;
   } else {
-    // Serial.println("  MCUDP::parseIncomingPacket, parsing Json failed.");
+    Serial.println("  MCUDP:parseData, failed parsing Json Data.");
     return false;
   }
-  return true;
+  return false;
 }
 
-bool MCUDP::parseJsonChilds(String data) {
-  DynamicJsonBuffer jsonBuffer;
-  String cubeJson = Cube.getJson();
-  JsonObject &root = jsonBuffer.parseObject(cubeJson);
-  JsonObject &element = root[Cube.getLocalIP()].as<JsonObject>();
-  String childs = Cube.getChilds();
-  JsonObject &childsObject = element[CH_STRING].as<JsonObject>();
-  JsonObject &receivedData = jsonBuffer.parseObject(data);
-
-  if (!receivedData.success()) {
-    // Serial.println("Error: MCUDP::savePacketToJson, couldn't parse the
-    // Json");
-    return false;
+bool MCUDP::parseAndroidPacket(IPAddress ip, uint32_t port,
+                               String incomingPacket) {
+  androidIP = ip;
+  androidPort = port;
+  if (incomingPacket.indexOf("lIP") != -1) {
+    parseActivate(incomingPacket);
   }
-  // Update if the value does not exist
-  String deviceName = receivedData.begin()->key;
-  JsonObject &deviceData = receivedData[deviceName].as<JsonObject>();
-  childsObject[deviceName] = deviceData;
-  String childString;
-  childsObject.printTo(childString);
-  Cube.setChilds(childString);
-  MC_MQTT.publish(MQTT_TOPIC_DATA, Cube.getJson());
-  return true;
+  return false;
 }
 
 MCUDP MC_UDP;

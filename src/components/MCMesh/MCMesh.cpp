@@ -1,5 +1,6 @@
 #include <components/MCMQTT/MCMQTT.h>
 #include <components/MCMesh/MCMesh.h>
+#include <components/MCUDP/MCUDP.h>
 #include <components/MCWiFi/MCWiFi.h>
 #include <configuration/Configuration.h>
 #include <data/ModularCube.h>
@@ -9,8 +10,10 @@ painlessMesh mesh;
 void MCMesh::setup() {
   t0 = millis();
   setMasterIfMeshDoesNotExist();
-  mesh.setDebugMsgTypes(ERROR | STARTUP);
-  mesh.init(MESH_PREFIX, MESH_PASSWORD, MESH_PORT);
+  mesh.setDebugMsgTypes(ERROR);
+  mesh.init(MESH_PREFIX, MESH_PASSWORD, MESH_PORT, STA_AP, AUTH_WPA2_PSK, 1,
+            PHY_MODE_11G, 82, !Cube.isMaster(), 4);
+
   setUpCallbacks();
   Cube.setDeviceID(mesh.getNodeId());
 }
@@ -19,11 +22,11 @@ void MCMesh::loop() { mesh.update(); }
 
 void MCMesh::setUpCallbacks() {
   mesh.onNewConnection([](uint32_t nodeId) {
-    // Serial.printf("  MCMesh -> New Connection, nodeId = %u\n", nodeId);
+    Serial.printf("  MCMesh -> New Connection, nodeId = %u\n", nodeId);
   });
   mesh.onReceive([&](uint32_t from, String &msg) {
-    // Serial.printf("  MCMesh -> New Message, nodeId = %u, msg = %s\n", from,
-    // msg.c_str());
+    Serial.printf("  MCMesh -> New Message, nodeId = %u, msg = %s\n", from,
+                  msg.c_str());
     if (Cube.isMaster()) {
       parseJsonChilds(msg);
     } else {
@@ -40,21 +43,21 @@ void MCMesh::publishToAll(String msg) { mesh.sendBroadcast(msg); }
 
 void MCMesh::setMasterIfMeshDoesNotExist() {
   if (checkIfMeshExists(MESH_PREFIX)) {
-    // Serial.println("MCMesh -> Mesh FOUND");
+    Serial.println("MCMesh -> Mesh FOUND");
     Cube.setMaster(false);
   } else {
-    // Serial.println("MCMesh -> Mesh NOT FOUND");
+    Serial.println("MCMesh -> Mesh NOT FOUND");
     Cube.setMaster(true);
   }
 }
 
 bool MCMesh::checkIfMeshExists(const char *ssid, int wait) {
-  // Serial.printf("Trying to find %s...\n", ssid);
+  Serial.printf("Trying to find %s...\n", ssid);
   int tries = 0;
   int maxTries = (wait / 10) + 1;
   while (tries < maxTries) {
     int n = WiFi.scanNetworks();
-    // Serial.printf("%i network(s) found. ", n);
+    Serial.printf("%i network(s) found. ", n);
     for (int i = 0; i < n; i++) {
       if (WiFi.SSID(i) == ssid) {
         return true;
@@ -76,8 +79,7 @@ bool MCMesh::parseJsonChilds(String data) {
   JsonObject &receivedData = jsonBuffer.parseObject(data);
 
   if (!receivedData.success()) {
-    // Serial.println("Error: MCUDP::savePacketToJson, couldn't parse the
-    // Json");
+    Serial.println("Error: MCUDP::savePacketToJson, couldn't parse the Json");
     return false;
   }
   // Update if the value does not exist
@@ -87,7 +89,9 @@ bool MCMesh::parseJsonChilds(String data) {
   String childString;
   childsObject.printTo(childString);
   Cube.setChilds(childString);
-  MC_MQTT.publish(MQTT_TOPIC_DATA, Cube.getJson());
+
+  String msg = "data=" + Cube.getJson();
+  MC_UDP.sendPacket(MC_UDP.androidIP, msg.c_str(), MC_UDP.androidPort);
   return true;
 }
 
@@ -104,7 +108,7 @@ bool MCMesh::parseIncomingPacket(uint32_t master, String data) {
       publish(master, msg);
     }
   } else {
-    // Serial.println("  MCMesh::parseIncomingPacket, parsing Json failed.");
+    Serial.println("  MCMesh::parseIncomingPacket, parsing Json failed.");
     return false;
   }
   return true;

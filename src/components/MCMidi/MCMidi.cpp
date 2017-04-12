@@ -13,12 +13,12 @@ MCMidi::MCMidi() {
 }
 
 void MCMidi::setup() {
-  // Serial.println("\nCreating AppleMidi Session.");
-  // Serial.printf(" - Session Name: %s\n", APPLE_MIDI_SESSION);
+  Serial.println("\nCreating AppleMidi Session.");
+  Serial.printf(" - Session Name: %s\n", APPLE_MIDI_SESSION);
   IPAddress ip = WiFi.localIP();
-  // Serial.print(" - Host/Port: ");
-  // Serial.print(ip);
-  // Serial.println(":5004");
+  Serial.print(" - Host/Port: ");
+  Serial.print(ip);
+  Serial.println(":5004");
 
   AppleMIDI.begin(APPLE_MIDI_SESSION);
   setupCallbacks();
@@ -42,32 +42,32 @@ void MCMidi::loop() {
 void MCMidi::setupCallbacks() {
   AppleMIDI.OnConnected([](uint32_t ssrc, char *name) {
     MC_Midi.isConnected = true;
-    // Serial.printf(" - Connected to Session: \n", name);
+    Serial.printf(" - Connected to Session: \n", name);
   });
 
   AppleMIDI.OnDisconnected([](uint32_t ssrc) {
     MC_Midi.isConnected = false;
-    // Serial.printf(" - Disconnected\n");
+    Serial.printf(" - Disconnected\n");
   });
 
   AppleMIDI.OnReceiveNoteOn([](byte channel, byte note, byte velocity) {
-    // Serial.print(" - Incoming NoteOn from channel: ");
-    // Serial.print(channel);
-    // Serial.print(" - Note: ");
-    // Serial.print(note);
-    // Serial.print(" - Velocity: ");
-    // Serial.print(velocity);
-    // Serial.println();
+    Serial.print(" - Incoming NoteOn from channel: ");
+    Serial.print(channel);
+    Serial.print(" - Note: ");
+    Serial.print(note);
+    Serial.print(" - Velocity: ");
+    Serial.print(velocity);
+    Serial.println();
   });
 
   AppleMIDI.OnReceiveNoteOff([](byte channel, byte note, byte velocity) {
-    // Serial.print(" - Incoming NoteOff from channel: ");
-    // Serial.print(channel);
-    // Serial.print(" - Note: ");
-    // Serial.print(note);
-    // Serial.print(" - Velocity: ");
-    // Serial.print(velocity);
-    // Serial.println();
+    Serial.print(" - Incoming NoteOff from channel: ");
+    Serial.print(channel);
+    Serial.print(" - Note: ");
+    Serial.print(note);
+    Serial.print(" - Velocity: ");
+    Serial.print(velocity);
+    Serial.println();
   });
 }
 

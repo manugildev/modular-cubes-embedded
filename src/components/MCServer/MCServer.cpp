@@ -5,7 +5,7 @@
 #include <data/ModularCube.h>
 
 ESP8266WebServer server(80);
-RestClient client = RestClient("192.168.4.1");
+RestClient client = RestClient("10.215.0.1");
 
 MCServer::MCServer() { homePage = "Hi from the server!"; }
 
@@ -17,9 +17,7 @@ void MCServer::loop() { server.handleClient(); }
 
 // Get
 void MCServer::handleGET() {
-  if (Cube.isMaster()) {
-    server.send(HTTP_CODE_OK, "application/json", Cube.getJson());
-  }
+  server.send(HTTP_CODE_OK, "application/json", Cube.getJson());
 }
 
 String MCServer::parseError(String data) {

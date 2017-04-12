@@ -1,9 +1,9 @@
 #include <data/ModularCube.h>
 
-#include <ESP8266WiFi.h>
 #include <components/MCAccelerometer/MCAccelerometer.h>
 #include <components/MCMQTT/MCMQTT.h>
 #include <components/MCMesh/MCMesh.h>
+#include <components/MCUDP/MCUDP.h>
 #include <components/MCWiFi/MCWiFi.h>
 #include <configuration/Configuration.h>
 
@@ -28,13 +28,12 @@ ModularCube::ModularCube() {
 void ModularCube::setup() {
   pinMode(2, OUTPUT);
   Serial.begin(115200);
-  // Serial.println("\nSetting Up ModularCube.");
+  Serial.println("\nSetting Up ModularCube.");
   MC_Mesh.setup();
   if (isMaster()) {
-    MC_WiFi.connectToWiFi(WIFI_SSID, WIFI_PASSWORD);
-    MC_MQTT.setup();
+    MC_UDP.setup();
   }
-  // Serial.println("SetUp for ModularCube done.\n");
+  Serial.println("SetUp for ModularCube done.\n");
 }
 
 /****************************************************************************
@@ -44,23 +43,19 @@ long rNumber = random(3000, 10000);
 void ModularCube::loop() {
   ledLoop();
   if (isMaster()) {
-    MC_MQTT.loop();
+    MC_UDP.loop();
   }
   MC_Mesh.loop();
-
   if ((millis() - t0) > rNumber && isActivated()) {
     t0 = millis();
     rNumber = random(3000, 10000);
     currentOrientation = MC_Accelerometer.getCurrentOrientation();
     if (!Cube.isMaster()) {
-      String msg = getJson();
-      MC_Mesh.publishToAll(msg);
-      // TODO: Send only if the previous state changes
-      // if (!MC_UDP.sendPacket(IPAddress(192, 168, 4, 1), msg.c_str())) {
-      //   // Serial.println("Error sending the package");
-      // }
+      MC_Mesh.publishToAll(getJson());
     } else {
-      MC_MQTT.publish(MQTT_TOPIC_DATA, getJson());
+      String msg = "data=" + getJson();
+      MC_UDP.sendPacket(MC_UDP.androidIP, msg.c_str(), MC_UDP.androidPort);
+      // MC_Mesh.publishToAll(msg);
     }
   }
 }
@@ -75,7 +70,7 @@ void ModularCube::ledLoop() {
     digitalWrite(2, HIGH);
 }
 void ModularCube::reboot() {
-  // Serial.println("Rebooting...");
+  Serial.println("Rebooting...");
   ESP.restart();
 }
 
