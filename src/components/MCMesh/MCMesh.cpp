@@ -1,3 +1,5 @@
+#include <Arduino.h>
+#include <components/GameLogic/GameLogic.h>
 #include <components/MCMQTT/MCMQTT.h>
 #include <components/MCMesh/MCMesh.h>
 #include <components/MCUDP/MCUDP.h>
@@ -28,18 +30,19 @@ void MCMesh::setUpCallbacks() {
     Serial.printf("  MCMesh -> New Message, nodeId = %u, msg = %s\n", from,
                   msg.c_str());
     if (Cube.isMaster()) {
-      parseJsonChilds(msg);
+      if(msg.indexOf("light")==-1) parseJsonChilds(msg);
+      else parseIncomingPacket(from, msg);
     } else {
       parseIncomingPacket(from, msg);
     }
   });
 }
 
-void MCMesh::publish(uint32_t destId, String msg) {
-  mesh.sendSingle(destId, msg);
+bool MCMesh::publish(uint32_t destId, String msg) {
+  return mesh.sendSingle(destId, msg);
 }
 
-void MCMesh::publishToAll(String msg) { mesh.sendBroadcast(msg); }
+bool MCMesh::publishToAll(String msg) { return mesh.sendBroadcast(msg); }
 
 void MCMesh::setMasterIfMeshDoesNotExist() {
   if (checkIfMeshExists(MESH_PREFIX)) {
@@ -99,19 +102,56 @@ bool MCMesh::parseIncomingPacket(uint32_t master, String data) {
   DynamicJsonBuffer jsonBuffer;
   JsonObject &root = jsonBuffer.parseObject(data);
   if (root.success()) {
-    String lIP = root[LI_STRING];
-    if (lIP == String(Cube.getDeviceId())) {
-      int activated = root[AC_STRING].as<int>();
-      Cube.setActivated(root[AC_STRING] ? true : false);
-      String msg = Cube.getJson();
-      // TODO: Send the master that the activate has changed
-      publish(master, msg);
+    if (data.indexOf("light") != -1) {
+      return parseGameLight(data);
+    } else {
+      return parseActivate(master, data);
     }
   } else {
     Serial.println("  MCMesh::parseIncomingPacket, parsing Json failed.");
     return false;
   }
   return true;
+}
+
+bool MCMesh::parseGameLight(String data) {
+  // TODO: Cambiar lIP for deviceId everywhere and change the parsing thing
+  DynamicJsonBuffer jsonBuffer;
+  JsonObject &root = jsonBuffer.parseObject(data);
+  uint32_t lIP = root[LI_STRING].as<uint32_t>();
+  if (lIP == Cube.getDeviceId()) {
+    int light = root["light"];
+    int t = root["time"].as<int>();
+    GL.switchOnLight(t);
+    return true;
+  }
+  return false;
+}
+
+bool MCMesh::parseActivate(uint32_t master, String data) {
+  DynamicJsonBuffer jsonBuffer;
+  JsonObject &root = jsonBuffer.parseObject(data);
+  String lIP = root[LI_STRING];
+  int activated = root[AC_STRING].as<int>();
+  if (!activated) {
+    //GL.switchRandomLightInMesh(+50);
+    return true;
+  }
+  return false;
+}
+/*
+* Return a random node id from the nodes list. If you have only this node it
+* returns 0
+*/
+uint32_t MCMesh::getRandomNode() {
+  SimpleList<uint32_t> nodes = mesh.getNodeList();
+  int i = 0;
+  int r = random(0, nodes.size());
+  for (SimpleList<uint32_t>::iterator itr = nodes.begin(); itr != nodes.end(); ++itr){
+    if (i == r) return *itr;
+    i++;
+  }
+  return 0;
 }
 
 MCMesh MC_Mesh;

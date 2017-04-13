@@ -288,7 +288,6 @@ SimpleList<uint32_t> ICACHE_FLASH_ATTR painlessMesh::getNodeList() {
     String nodeJson = subConnectionJson();
 
     uint index = 0;
-
     while (index < nodeJson.length()) {
         uint comma = 0;
         index = nodeJson.indexOf("\"nodeId\":");
@@ -296,10 +295,10 @@ SimpleList<uint32_t> ICACHE_FLASH_ATTR painlessMesh::getNodeList() {
             break;
         comma = nodeJson.indexOf(',', index);
         String temp = nodeJson.substring(index + 9, comma);
-        nodeList.push_back(temp.toInt());
+        uint32_t id = strtoul(temp.c_str(), NULL, 10);
+        nodeList.push_back(id);
         index = comma + 1;
         nodeJson = nodeJson.substring(index);
-
     }
 
     return nodeList;
@@ -472,13 +471,11 @@ void ICACHE_FLASH_ATTR painlessMesh::meshSentCb(void *arg) {
         staticThis->debugMsg(ERROR, "meshSentCb(): err did not find meshConnection? Likely it was dropped for some reason\n");
         return;
     }
-    
     if (!meshConnection->sendQueue.empty()) {
         for (int i = 0; i < MAX_CONSECUTIVE_SEND; ++i) {
             String package = *meshConnection->sendQueue.begin();
 
-            sint8 errCode = espconn_send(meshConnection->esp_conn, 
-                    (uint8*)package.c_str(), package.length());
+            sint8 errCode = espconn_send(meshConnection->esp_conn, (uint8*)package.c_str(), package.length());
             if (errCode != 0) {
                 staticThis->debugMsg(ERROR, "meshSentCb(): espconn_send Failed err=%d Queue size %d\n", errCode, meshConnection->sendQueue.size());
                 break;

@@ -3,6 +3,7 @@
 #include <components/MCMQTT/MCMQTT.h>
 #include <components/MCMesh/MCMesh.h>
 #include <components/MCUDP/MCUDP.h>
+#include <components/GameLogic/GameLogic.h>
 #include <components/MCWiFi/MCWiFi.h>
 #include <configuration/Configuration.h>
 #include <data/ModularCube.h>
@@ -52,6 +53,7 @@ bool MCUDP::receivePacket() {
     String ip = udp.remoteIP().toString() + ":" + udp.remotePort();
     Serial.printf("  MCUDP -> New Message: %s, from %s\n", incomingPacket,
                   ip.c_str());
+    if (String(incomingPacket).indexOf("android") != -1) Cube.setMaster(true);
     if (Cube.isMaster()) {
       // This is for the firs message the app sends
       if (String(incomingPacket).indexOf("android") != -1) {
@@ -88,12 +90,9 @@ bool MCUDP::parseActivate(String response) {
         MC_Mesh.publish(lIP.toInt(), array[i].as<String>());
       } else {
         int activated = array[i][AC_STRING].as<int>();
-        Cube.setActivated(array[i][AC_STRING] ? true : false);
-        Serial.println("  MCUDP -> Set Activate: " +
-                       String(Cube.isActivated()));
-        String msg = "data=" + Cube.getJson();
-        sendPacket(androidIP, msg.c_str(), androidPort);
-      }
+        if (!activated) {
+          //GL.switchRandomLightInMesh(+50);
+      }}
     }
     return true;
   } else {
