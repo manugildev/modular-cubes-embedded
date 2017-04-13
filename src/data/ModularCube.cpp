@@ -25,7 +25,6 @@ ModularCube::ModularCube() {
 * Setup
 ****************************************************************************/
 void ModularCube::setup() {
-  pinMode(2, OUTPUT);
   Serial.begin(115200);
   Serial.println("\nSetting Up ModularCube.");
   MC_Mesh.setup();
@@ -44,7 +43,7 @@ long rNumber = random(3000, 10000);
 void ModularCube::loop() {
   ledLoop();
     MC_UDP.loop();
-  
+
   MC_Mesh.loop();
   GL.loop();
   if ((millis() - t0) > rNumber && isActivated()) {
@@ -82,12 +81,6 @@ void ModularCube::setCurrentOrientation(int cO) { currentOrientation = cO; }
 void ModularCube::setMaster(bool m) { master = m; }
 void ModularCube::setActivated(bool a) {
   activated = a;
-  if (isMaster()) {
-    String msg = "data=" + Cube.getJson();
-    MC_UDP.sendPacket(MC_UDP.androidIP, msg.c_str(), MC_UDP.androidPort);
-  } else {
-    MC_Mesh.publishToAll(Cube.getJson());
-  }
 }
 
 /****************************************************************************
@@ -111,6 +104,15 @@ String ModularCube::getJson() {
     return "{\"" + String(getDeviceId()) + "\":{\"" + CO_STRING + "\":" +
            getCurrentOrientation() + ",\"" + AC_STRING + "\":" + isActivated() +
            "}}";
+  }
+}
+
+void ModularCube::refreshData(){
+  if (Cube.isMaster()) {
+    String msg = "data=" + Cube.getJson();
+    MC_UDP.sendPacket(MC_UDP.androidIP, msg.c_str(), MC_UDP.androidPort);
+  } else {
+    MC_Mesh.publishToAll(Cube.getJson());
   }
 }
 

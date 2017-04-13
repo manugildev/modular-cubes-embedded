@@ -3,20 +3,27 @@
 #include <components/MCMesh/MCMesh.h>
 #include <data/ModularCube.h>
 
-void GameLogic::setup() {}
+#define BUILT_IN_LED 2
+#define BUILT_IN_BUTTON 16
+#define START_MS_INTERVAL 3000
+#define MS_MINIMUM 200
+#define MS_DECREMENT -100
+#define MS_INCREMENT +100
+
+void GameLogic::setup() {
+  pinMode(BUILT_IN_LED, OUTPUT);
+  pinMode(BUILT_IN_BUTTON, INPUT);
+}
 
 void GameLogic::loop() {
   if (Cube.isActivated() && millis() > endTime) {
-    digitalWrite(2, HIGH);
-    Cube.setActivated(false);
-    switchRandomLightInMesh(-100);
-  } else if (millis() < endTime) {
-    digitalWrite(2, LOW);
-  } else {
-    digitalWrite(2, HIGH);
-    if(MC_Mesh.mesh.getNodeList().size()==0){
-      switchOnLight(3000);
-    }
+    digitalWrite(BUILT_IN_LED, HIGH);
+    switchRandomLightInMesh(MS_DECREMENT);
+  } else if (Cube.isActivated() && millis() < endTime) {
+    digitalWrite(BUILT_IN_LED, LOW);
+  } else if (!Cube.isActivated()){
+    digitalWrite(BUILT_IN_LED, HIGH);
+    if(MC_Mesh.mesh.getNodeList().size()==0) switchOnLight(START_MS_INTERVAL);
   }
 }
 
@@ -26,23 +33,23 @@ void GameLogic::switchOnLight(int milliseconds) {
   startTime = millis();
   endTime = millis() + milliseconds;
   Cube.setActivated(true);
+  Cube.refreshData();
   // TODO: Move this to the SetActivate Function?
 }
 
 void GameLogic::switchRandomLightInMesh(int addSeconds) {
-  // This is just to be sure that the light turns off, and that we change.
-  //digitalWrite(2, HIGH);
-  //Cube.setActivated(false);
+  Cube.setActivated(false);
+  Cube.refreshData();
 
   uint32_t randomNode = MC_Mesh.getRandomNode();
   Serial.println("  GL -> switchRandomLightInMesh(" + String(randomNode) + ")");
   if (randomNode == Cube.getDeviceId() || randomNode == 0) {
-    switchOnLight(max(200, currentMilliseconds + addSeconds));
+    switchOnLight(max(MS_MINIMUM, currentMilliseconds));
     return;
   }
   if (randomNode != 0)
     if (!MC_Mesh.publish(randomNode, createJsonLight(randomNode, addSeconds))) {
-      switchOnLight(max(200, currentMilliseconds + addSeconds));
+      switchOnLight(max(MS_MINIMUM, currentMilliseconds));
     }
 }
 
@@ -52,11 +59,16 @@ String GameLogic::createJsonLight(uint32_t randomNode, int addSeconds) {
   JsonObject &data = jsonBuffer.createObject();
   data["lIP"] = randomNode;
   data["light"] = 1;
-  data["time"] = max(200, currentMilliseconds+addSeconds);
+  data["time"] = max(MS_MINIMUM, currentMilliseconds+addSeconds);
   array.add(data);
   String msg;
   data.printTo(msg);
   return msg;
+}
+
+void GameLogic::clicked(){
+  Serial.println("  GL -> CLICKED!");
+  switchRandomLightInMesh(MS_INCREMENT);
 }
 
 GameLogic GL;

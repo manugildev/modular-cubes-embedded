@@ -70,8 +70,7 @@ bool MCMQTT::parseActivate(String response) {
       } else {
         int activated = array[i][AC_STRING].as<int>();
         Cube.setActivated(array[i][AC_STRING] ? true : false);
-        Serial.println("  MCMQTT -> Set Activate: " +
-                       String(Cube.isActivated()));
+        Serial.println("  MCMQTT -> Set Activate: " + String(Cube.isActivated()));
         if (!array[i][AC_STRING])
           publish(MQTT_TOPIC_DATA, Cube.getJson().c_str());
       }

@@ -134,6 +134,7 @@ bool MCMesh::parseActivate(uint32_t master, String data) {
   String lIP = root[LI_STRING];
   int activated = root[AC_STRING].as<int>();
   if (!activated) {
+    GL.clicked();
     //GL.switchRandomLightInMesh(+50);
     return true;
   }

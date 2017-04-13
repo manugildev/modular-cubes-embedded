@@ -34,6 +34,7 @@ public:
   void loop();
   void reboot();
   void ledLoop();
+  void refreshData();
 
 private:
   // Variables

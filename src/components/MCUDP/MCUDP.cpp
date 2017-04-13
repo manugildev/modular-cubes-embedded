@@ -91,6 +91,7 @@ bool MCUDP::parseActivate(String response) {
       } else {
         int activated = array[i][AC_STRING].as<int>();
         if (!activated) {
+          GL.clicked();
           //GL.switchRandomLightInMesh(+50);
       }}
     }
