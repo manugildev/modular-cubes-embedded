@@ -29,6 +29,7 @@ void ModularCube::setup() {
   Serial.begin(115200);
   Serial.println("\nSetting Up ModularCube.");
   MC_Mesh.setup();
+  MC_Accelerometer.setup();
     MC_UDP.setup();
 
   GL.setup();
@@ -44,19 +45,25 @@ long rNumber = random(3000, 10000);
 void ModularCube::loop() {
   ledLoop();
     MC_UDP.loop();
-  
+
   MC_Mesh.loop();
   GL.loop();
-  if ((millis() - t0) > rNumber && isActivated()) {
+  if ((millis() - t0) > 100 /*&& isActivated()*/) {
     t0 = millis();
-    rNumber = random(3000, 10000);
-    currentOrientation = MC_Accelerometer.getCurrentOrientation();
-    if (!Cube.isMaster()) {
-       MC_Mesh.publishToAll(getJson());
-    } else {
-      String msg = "data=" + getJson();
-      MC_UDP.sendPacket(MC_UDP.androidIP, msg.c_str(), MC_UDP.androidPort);
-    }
+    //This will update only every 100ms
+    MC_Accelerometer.loop();
+  }
+}
+
+void ModularCube::updateOrientation(){
+  currentOrientation = MC_Accelerometer.getCurrentOrientation();
+  Serial.print("--> UpdateOrientation() - Orientation: ");
+  Serial.println(currentOrientation);
+  if (!Cube.isMaster()) {
+     MC_Mesh.publishToAll(getJson());
+  } else {
+    String msg = "data=" + getJson();
+    MC_UDP.sendPacket(MC_UDP.androidIP, msg.c_str(), MC_UDP.androidPort);
   }
 }
 

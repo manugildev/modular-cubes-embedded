@@ -1,3 +1,4 @@
+#pragma once
 #include <Arduino.h>
 
 #include <ESP8266HTTPClient.h>
@@ -34,6 +35,7 @@ public:
   void loop();
   void reboot();
   void ledLoop();
+  void updateOrientation();
 
 private:
   // Variables
