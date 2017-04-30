@@ -9,6 +9,7 @@ public:
   String createJsonLight(uint32_t randomNode, int addSeconds);
 
   int currentMilliseconds;
+
 private:
   int endTime;
   int startTime;

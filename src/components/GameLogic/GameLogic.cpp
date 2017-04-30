@@ -14,7 +14,7 @@ void GameLogic::loop() {
     digitalWrite(2, LOW);
   } else {
     digitalWrite(2, HIGH);
-    if(MC_Mesh.mesh.getNodeList().size()==0){
+    if (MC_Mesh.mesh.getNodeList().size() == 0) {
       switchOnLight(3000);
     }
   }
@@ -31,8 +31,8 @@ void GameLogic::switchOnLight(int milliseconds) {
 
 void GameLogic::switchRandomLightInMesh(int addSeconds) {
   // This is just to be sure that the light turns off, and that we change.
-  //digitalWrite(2, HIGH);
-  //Cube.setActivated(false);
+  // digitalWrite(2, HIGH);
+  // Cube.setActivated(false);
 
   uint32_t randomNode = MC_Mesh.getRandomNode();
   Serial.println("  GL -> switchRandomLightInMesh(" + String(randomNode) + ")");
@@ -52,7 +52,7 @@ String GameLogic::createJsonLight(uint32_t randomNode, int addSeconds) {
   JsonObject &data = jsonBuffer.createObject();
   data["lIP"] = randomNode;
   data["light"] = 1;
-  data["time"] = max(200, currentMilliseconds+addSeconds);
+  data["time"] = max(200, currentMilliseconds + addSeconds);
   array.add(data);
   String msg;
   data.printTo(msg);

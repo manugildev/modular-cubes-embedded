@@ -30,12 +30,12 @@ void ModularCube::setup() {
   Serial.println("\nSetting Up ModularCube.");
   MC_Mesh.setup();
   MC_Accelerometer.setup();
-    MC_UDP.setup();
+  MC_UDP.setup();
 
-  GL.setup();
+  // GL.setup();
   Serial.println("SetUp for ModularCube done.\n");
-  if (isMaster())
-    GL.switchOnLight(3000);
+  /*if (isMaster())
+    GL.switchOnLight(3000);*/
 }
 
 /****************************************************************************
@@ -44,23 +44,23 @@ void ModularCube::setup() {
 long rNumber = random(3000, 10000);
 void ModularCube::loop() {
   ledLoop();
-    MC_UDP.loop();
+  MC_UDP.loop();
 
   MC_Mesh.loop();
-  GL.loop();
+  // GL.loop();
   if ((millis() - t0) > 100 /*&& isActivated()*/) {
     t0 = millis();
-    //This will update only every 100ms
+    // This will update only every 100ms
     MC_Accelerometer.loop();
   }
 }
 
-void ModularCube::updateOrientation(){
+void ModularCube::updateOrientation() {
   currentOrientation = MC_Accelerometer.getCurrentOrientation();
   Serial.print("--> UpdateOrientation() - Orientation: ");
   Serial.println(currentOrientation);
   if (!Cube.isMaster()) {
-     MC_Mesh.publishToAll(getJson());
+    MC_Mesh.publishToAll(getJson());
   } else {
     String msg = "data=" + getJson();
     MC_UDP.sendPacket(MC_UDP.androidIP, msg.c_str(), MC_UDP.androidPort);
@@ -111,13 +111,13 @@ bool ModularCube::isMaster() { return master; }
 bool ModularCube::isActivated() { return activated; }
 String ModularCube::getJson() {
   if (isMaster()) {
-    return "{\"" + String(MC_Mesh.mesh.getNodeId()) + "\":{\"" + CO_STRING + "\":" +
-           getCurrentOrientation() + ",\"" + AC_STRING + "\":" + isActivated() +
-           ",\"" + CH_STRING + "\":" + getChilds() + "}}";
+    return "{\"" + String(MC_Mesh.mesh.getNodeId()) + "\":{\"" + CO_STRING +
+           "\":" + getCurrentOrientation() + ",\"" + AC_STRING + "\":" +
+           isActivated() + ",\"" + CH_STRING + "\":" + getChilds() + "}}";
   } else {
-    return "{\"" + String(MC_Mesh.mesh.getNodeId()) + "\":{\"" + CO_STRING + "\":" +
-           getCurrentOrientation() + ",\"" + AC_STRING + "\":" + isActivated() +
-           "}}";
+    return "{\"" + String(MC_Mesh.mesh.getNodeId()) + "\":{\"" + CO_STRING +
+           "\":" + getCurrentOrientation() + ",\"" + AC_STRING + "\":" +
+           isActivated() + "}}";
   }
 }
 
