@@ -1,6 +1,6 @@
 #Adafruit MMA8451 Accelerometer Driver #
 
-This driver is for the Adafruit MMA8451 Accelerometer Breakout (http://www.adafruit.com/products/2019), and is based on Adafruit's Unified Sensor Library (Adafruit_Sensor).
+This driver is for the Adafruit MMA8451 Accelerometer Breakout (http://www.adafruit.com/products/2019), and is based on Adafruit's Unified Sensor Library (Sensor).
 
 ## About the MMA8451 ##
 
@@ -10,9 +10,9 @@ More information on the MMA8451 can be found in the datasheet: http://www.adafru
 
 ## What is the Adafruit Unified Sensor Library? ##
 
-The Adafruit Unified Sensor Library (https://github.com/adafruit/Adafruit_Sensor) provides a common interface and data type for any supported sensor.  It defines some basic information about the sensor (sensor limits, etc.), and returns standard SI units of a specific type and scale for each supported sensor type.
+The Adafruit Unified Sensor Library (https://github.com/adafruit/Sensor) provides a common interface and data type for any supported sensor.  It defines some basic information about the sensor (sensor limits, etc.), and returns standard SI units of a specific type and scale for each supported sensor type.
 
-It provides a simple abstraction layer between your application and the actual sensor HW, allowing you to drop in any comparable sensor with only one or two lines of code to change in your project (essentially the constructor since the functions to read sensor data and get information about the sensor are defined in the base Adafruit_Sensor class).
+It provides a simple abstraction layer between your application and the actual sensor HW, allowing you to drop in any comparable sensor with only one or two lines of code to change in your project (essentially the constructor since the functions to read sensor data and get information about the sensor are defined in the base Sensor class).
 
 This is imporant useful for two reasons:
 

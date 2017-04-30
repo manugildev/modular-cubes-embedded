@@ -36,6 +36,56 @@ void MCMesh::setUpCallbacks() {
       parseIncomingPacket(from, msg);
     }
   });
+  mesh.onChangedConnections([&]() {
+    if (Cube.isMaster()) {
+      DynamicJsonBuffer jsonBuffer;
+      String cubeJson = Cube.getJson();
+      JsonObject &root = jsonBuffer.parseObject(cubeJson);
+      JsonObject &element = root[String(Cube.getDeviceId())].as<JsonObject>();
+      String childs = Cube.getChilds();
+      JsonObject &childsObject = element[CH_STRING].as<JsonObject>();
+
+      SimpleList<uint32_t> nodes = mesh.getNodeList();
+      SimpleList<uint32_t> childList;
+
+      // Posible fallo aqui con la numeración
+      for(JsonObject::iterator it=childsObject.begin(); it!=childsObject.end(); ++it){
+          const char* key = it->key;
+          Serial.println(key);
+          uint32_t id = strtoul(key, NULL, 10);
+          const uint32_t number = id;
+          Serial.println(number);
+          childList.push_back(number);
+      }
+
+
+      //Serial.println("ChildListSize: " + String(childList.size()) + " NodesSize:" + String(nodes.size()));
+      for (SimpleList<uint32_t>::iterator itr = childList.begin(); itr != childList.end(); ++itr){
+        bool contains = false;
+        for (SimpleList<uint32_t>::iterator itr1 = nodes.begin(); itr1 != nodes.end(); ++itr1){
+            if(*itr==*itr1){
+              //Serial.println("ChildList: " + String(*itr) + " Nodes:" + String(*itr1) + " Contains = true");
+              contains = true;
+            }
+        }
+
+        if(!contains && *itr!=mesh.getNodeId()){
+          //Serial.print("ChildList: ");
+          char textToWrite[ 16 ];
+          sprintf(textToWrite,"%lu", *itr);
+          //  Serial.print(textToWrite);
+          //  Serial.println(" Contains = false");
+          childsObject.remove(textToWrite);
+          String childString;
+          childsObject.printTo(childString);
+          Cube.setChilds(childString);
+          // Delete from childs
+        }
+        Serial.println(Cube.getJson());
+      }
+
+    }
+  });
 }
 
 bool MCMesh::publish(uint32_t destId, String msg) {

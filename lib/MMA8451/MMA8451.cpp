@@ -1,6 +1,6 @@
 /**************************************************************************/
 /*!
-    @file     Adafruit_MMA8451.h
+    @file     MMA8451.h
     @author   K. Townsend (Adafruit Industries)
     @license  BSD (see license.txt)
 
@@ -24,7 +24,7 @@
 #endif
 
 #include <Wire.h>
-#include <Adafruit_MMA8451.h>
+#include <MMA8451.h>
 
 /**************************************************************************/
 /*!
@@ -53,7 +53,7 @@ static inline void i2cwrite(uint8_t x) {
     @brief  Writes 8-bits to the specified destination register
 */
 /**************************************************************************/
-void Adafruit_MMA8451::writeRegister8(uint8_t reg, uint8_t value) {
+void MMA8451::writeRegister8(uint8_t reg, uint8_t value) {
   Wire.beginTransmission(_i2caddr);
   i2cwrite((uint8_t)reg);
   i2cwrite((uint8_t)(value));
@@ -65,7 +65,7 @@ void Adafruit_MMA8451::writeRegister8(uint8_t reg, uint8_t value) {
     @brief  Reads 8-bits from the specified register
 */
 /**************************************************************************/
-uint8_t Adafruit_MMA8451::readRegister8(uint8_t reg) {
+uint8_t MMA8451::readRegister8(uint8_t reg) {
     Wire.beginTransmission(_i2caddr);
     i2cwrite(reg);
     Wire.endTransmission(false); // MMA8451 + friends uses repeated start!!
@@ -80,7 +80,7 @@ uint8_t Adafruit_MMA8451::readRegister8(uint8_t reg) {
     @brief  Instantiates a new MMA8451 class in I2C mode
 */
 /**************************************************************************/
-Adafruit_MMA8451::Adafruit_MMA8451(int32_t sensorID) {
+MMA8451::MMA8451(int32_t sensorID) {
   _sensorID = sensorID;
 }
 
@@ -89,7 +89,7 @@ Adafruit_MMA8451::Adafruit_MMA8451(int32_t sensorID) {
     @brief  Setups the HW (reads coefficients values, etc.)
 */
 /**************************************************************************/
-bool Adafruit_MMA8451::begin(uint8_t i2caddr) {
+bool MMA8451::begin(uint8_t i2caddr) {
   Wire.begin(13, 14);
   _i2caddr = i2caddr;
 
@@ -134,7 +134,7 @@ bool Adafruit_MMA8451::begin(uint8_t i2caddr) {
 }
 
 
-void Adafruit_MMA8451::read(void) {
+void MMA8451::read(void) {
   // read x y z at once
   Wire.beginTransmission(_i2caddr);
   i2cwrite(MMA8451_REG_OUT_X_MSB);
@@ -160,11 +160,11 @@ void Adafruit_MMA8451::read(void) {
 
 /**************************************************************************/
 /*!
-    @brief  Read the orientation: 
+    @brief  Read the orientation:
     Portrait/Landscape + Up/Down/Left/Right + Front/Back
 */
 /**************************************************************************/
-uint8_t Adafruit_MMA8451::getOrientation(void) {
+uint8_t MMA8451::getOrientation(void) {
   return readRegister8(MMA8451_REG_PL_STATUS) & 0x07;
 }
 
@@ -173,7 +173,7 @@ uint8_t Adafruit_MMA8451::getOrientation(void) {
     @brief  Sets the g range for the accelerometer
 */
 /**************************************************************************/
-void Adafruit_MMA8451::setRange(mma8451_range_t range)
+void MMA8451::setRange(mma8451_range_t range)
 {
   // lower bits are range
   writeRegister8(MMA8451_REG_CTRL_REG1, 0x00); // deactivate
@@ -186,7 +186,7 @@ void Adafruit_MMA8451::setRange(mma8451_range_t range)
     @brief  Sets the g range for the accelerometer
 */
 /**************************************************************************/
-mma8451_range_t Adafruit_MMA8451::getRange(void)
+mma8451_range_t MMA8451::getRange(void)
 {
   /* Read the data format register to preserve bits */
   return (mma8451_range_t)(readRegister8(MMA8451_REG_XYZ_DATA_CFG) & 0x03);
@@ -197,7 +197,7 @@ mma8451_range_t Adafruit_MMA8451::getRange(void)
     @brief  Sets the data rate for the MMA8451 (controls power consumption)
 */
 /**************************************************************************/
-void Adafruit_MMA8451::setDataRate(mma8451_dataRate_t dataRate)
+void MMA8451::setDataRate(mma8451_dataRate_t dataRate)
 {
   uint8_t ctl1 = readRegister8(MMA8451_REG_CTRL_REG1);
   ctl1 &= ~(0x28); // mask off bits
@@ -210,17 +210,17 @@ void Adafruit_MMA8451::setDataRate(mma8451_dataRate_t dataRate)
     @brief  Sets the data rate for the MMA8451 (controls power consumption)
 */
 /**************************************************************************/
-mma8451_dataRate_t Adafruit_MMA8451::getDataRate(void)
+mma8451_dataRate_t MMA8451::getDataRate(void)
 {
   return (mma8451_dataRate_t)((readRegister8(MMA8451_REG_CTRL_REG1) >> 3)& 0x07);
 }
 
 /**************************************************************************/
-/*! 
+/*!
     @brief  Gets the most recent sensor event
 */
 /**************************************************************************/
-bool Adafruit_MMA8451::getEvent(sensors_event_t *event) {
+bool MMA8451::getEvent(sensors_event_t *event) {
   /* Clear the event */
   memset(event, 0, sizeof(sensors_event_t));
 
@@ -234,16 +234,16 @@ bool Adafruit_MMA8451::getEvent(sensors_event_t *event) {
   event->acceleration.x = x_g;
   event->acceleration.y = y_g;
   event->acceleration.z = z_g;
-  
+
   return true;
 }
 
 /**************************************************************************/
-/*! 
+/*!
     @brief  Gets the sensor_t data
 */
 /**************************************************************************/
-void Adafruit_MMA8451::getSensor(sensor_t *sensor) {
+void MMA8451::getSensor(sensor_t *sensor) {
   /* Clear the sensor_t object */
   memset(sensor, 0, sizeof(sensor_t));
 
@@ -254,7 +254,7 @@ void Adafruit_MMA8451::getSensor(sensor_t *sensor) {
   sensor->sensor_id   = _sensorID;
   sensor->type        = SENSOR_TYPE_ACCELEROMETER;
   sensor->min_delay   = 0;
-  sensor->max_value   = 0;             
+  sensor->max_value   = 0;
   sensor->min_value   = 0;
-  sensor->resolution  = 0;             
+  sensor->resolution  = 0;
 }

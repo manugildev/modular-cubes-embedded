@@ -1,6 +1,6 @@
 /**************************************************************************/
 /*!
-    @file     Adafruit_MMA8451.h
+    @file     MMA8451.h
     @author   K. Townsend (Adafruit Industries)
     @license  BSD (see license.txt)
 
@@ -24,7 +24,7 @@
 #endif
 
 #include <Wire.h>
-#include <Adafruit_Sensor.h>
+#include <Sensor.h>
 
 /*=========================================================================
     I2C ADDRESS/BITS
@@ -75,9 +75,9 @@ typedef enum
   MMA8451_DATARATE_1_56_HZ    = 0b111, // 1.56Hz
 } mma8451_dataRate_t;
 
-class Adafruit_MMA8451 : public Adafruit_Sensor {
+class MMA8451 : public Sensor {
  public:
-  Adafruit_MMA8451(int32_t id = -1);
+  MMA8451(int32_t id = -1);
 
   
   bool       begin(uint8_t addr = MMA8451_DEFAULT_ADDRESS);

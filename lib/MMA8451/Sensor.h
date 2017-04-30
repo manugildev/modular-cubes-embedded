@@ -17,8 +17,8 @@
 /* Update by K. Townsend (Adafruit Industries) for lighter typedefs, and
  * extended sensor support to include color, voltage and current */
  
-#ifndef _ADAFRUIT_SENSOR_H
-#define _ADAFRUIT_SENSOR_H
+#ifndef _SENSOR_H
+#define _SENSOR_H
 
 #if ARDUINO >= 100
  #include "Arduino.h"
@@ -72,9 +72,9 @@ typedef struct {
         };
         /* Orientation sensors */
         struct {
-            float roll;    /**< Rotation around the longitudinal axis (the plane body, 'X axis'). Roll is positive and increasing when moving downward. -90°<=roll<=90° */
-            float pitch;   /**< Rotation around the lateral axis (the wing span, 'Y axis'). Pitch is positive and increasing when moving upwards. -180°<=pitch<=180°) */
-            float heading; /**< Angle between the longitudinal axis (the plane body) and magnetic north, measured clockwise when viewing from the top of the device. 0-359° */
+            float roll;    /**< Rotation around the longitudinal axis (the plane body, 'X axis'). Roll is positive and increasing when moving downward. -90ï¿½<=roll<=90ï¿½ */
+            float pitch;   /**< Rotation around the lateral axis (the wing span, 'Y axis'). Pitch is positive and increasing when moving upwards. -180ï¿½<=pitch<=180ï¿½) */
+            float heading; /**< Angle between the longitudinal axis (the plane body) and magnetic north, measured clockwise when viewing from the top of the device. 0-359ï¿½ */
         };
     };
     int8_t status;
@@ -136,11 +136,11 @@ typedef struct
     int32_t  min_delay;                       /**< min delay in microseconds between events. zero = not a constant rate */
 } sensor_t;
 
-class Adafruit_Sensor {
+class Sensor {
  public:
   // Constructor(s)
-  Adafruit_Sensor() {}
-  virtual ~Adafruit_Sensor() {}
+  Sensor() {}
+  virtual ~Sensor() {}
 
   // These must be defined by the subclass
   virtual void enableAutoRange(bool enabled) {};

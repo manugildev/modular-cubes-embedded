@@ -111,11 +111,11 @@ bool ModularCube::isMaster() { return master; }
 bool ModularCube::isActivated() { return activated; }
 String ModularCube::getJson() {
   if (isMaster()) {
-    return "{\"" + String(getDeviceId()) + "\":{\"" + CO_STRING + "\":" +
+    return "{\"" + String(MC_Mesh.mesh.getNodeId()) + "\":{\"" + CO_STRING + "\":" +
            getCurrentOrientation() + ",\"" + AC_STRING + "\":" + isActivated() +
            ",\"" + CH_STRING + "\":" + getChilds() + "}}";
   } else {
-    return "{\"" + String(getDeviceId()) + "\":{\"" + CO_STRING + "\":" +
+    return "{\"" + String(MC_Mesh.mesh.getNodeId()) + "\":{\"" + CO_STRING + "\":" +
            getCurrentOrientation() + ",\"" + AC_STRING + "\":" + isActivated() +
            "}}";
   }
