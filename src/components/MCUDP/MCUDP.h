@@ -1,15 +1,21 @@
-#pragma once
-
 #include <Arduino.h>
 #include <WiFiUdp.h>
 
 class MCUDP {
 public:
+  enum MessageType {
+    Initial = 0,
+    Connection = 1,
+    Disconnection = 2,
+    Information = 3
+  };
+  MessageType msgType;
+
   void setup();
   void loop();
   bool startUdpServer();
   bool receivePacket();
-  bool sendPacket(const IPAddress &address, const char *msg,
+  bool sendPacket(const IPAddress &address, int messageType, const char *msg,
                   uint16_t port = 8266);
   bool parseIncomingPacket(String data);
   bool parseAndroidPacket(IPAddress ip, uint32_t port, String incomingPacket);

@@ -1,9 +1,9 @@
 
 #include <ArduinoJson.h>
+#include <components/GameLogic/GameLogic.h>
 #include <components/MCMQTT/MCMQTT.h>
 #include <components/MCMesh/MCMesh.h>
 #include <components/MCUDP/MCUDP.h>
-#include <components/GameLogic/GameLogic.h>
 #include <components/MCWiFi/MCWiFi.h>
 #include <configuration/Configuration.h>
 #include <data/ModularCube.h>
@@ -36,10 +36,26 @@ bool MCUDP::startUdpServer() {
   return true;
 }
 
-bool MCUDP::sendPacket(const IPAddress &address, const char *msg,
-                       uint16_t port) {
+bool MCUDP::sendPacket(const IPAddress &address, int messageType,
+                       char const *msg, uint16_t port) {
   udp.beginPacket(address, port);
-  udp.write(msg);
+  String st;
+  switch (messageType) {
+  case Initial:
+    st = "initial=" + String(msg);
+    break;
+  case Connection:
+    st = "connection=" + String(msg);
+    break;
+  case Disconnection:
+    st = "disconnection=" + String(msg);
+    break;
+  case Information:
+    st = "information=" + String(msg);
+    break;
+  }
+
+  udp.write(st.c_str());
   return (udp.endPacket() == 1);
 }
 
@@ -53,15 +69,16 @@ bool MCUDP::receivePacket() {
     String ip = udp.remoteIP().toString() + ":" + udp.remotePort();
     Serial.printf("  MCUDP -> New Message: %s, from %s\n", incomingPacket,
                   ip.c_str());
-    if (String(incomingPacket).indexOf("android") != -1) Cube.setMaster(true);
+    if (String(incomingPacket).indexOf("android") != -1)
+      Cube.setMaster(true);
     if (Cube.isMaster()) {
       // This is for the firs message the app sends
       if (String(incomingPacket).indexOf("android") != -1) {
         // sendPacket(udp.remoteIP(), replyPacket, udp.remotePort());
         parseAndroidPacket(udp.remoteIP(), udp.remotePort(),
                            String(incomingPacket));
-        String msg = "data=" + Cube.getJson();
-        MC_UDP.sendPacket(MC_UDP.androidIP, msg.c_str(), MC_UDP.androidPort);
+        MC_UDP.sendPacket(MC_UDP.androidIP, Initial, Cube.getJson().c_str(),
+                          MC_UDP.androidPort);
       } else {
         parseAndroidPacket(udp.remoteIP(), udp.remotePort(),
                            String(incomingPacket));
@@ -91,8 +108,9 @@ bool MCUDP::parseActivate(String response) {
       } else {
         int activated = array[i][AC_STRING].as<int>();
         if (!activated) {
-          //GL.switchRandomLightInMesh(+50);
-      }}
+          // GL.switchRandomLightInMesh(+50);
+        }
+      }
     }
     return true;
   } else {

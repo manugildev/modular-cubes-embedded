@@ -62,8 +62,8 @@ void ModularCube::updateOrientation() {
   if (!Cube.isMaster()) {
     MC_Mesh.publishToAll(getJson());
   } else {
-    String msg = "data=" + getJson();
-    MC_UDP.sendPacket(MC_UDP.androidIP, msg.c_str(), MC_UDP.androidPort);
+    MC_UDP.sendPacket(MC_UDP.androidIP, 3, getJson().c_str(),
+                      MC_UDP.androidPort);
   }
 }
 
@@ -90,8 +90,8 @@ void ModularCube::setMaster(bool m) { master = m; }
 void ModularCube::setActivated(bool a) {
   activated = a;
   if (isMaster()) {
-    String msg = "data=" + Cube.getJson();
-    MC_UDP.sendPacket(MC_UDP.androidIP, msg.c_str(), MC_UDP.androidPort);
+    MC_UDP.sendPacket(MC_UDP.androidIP, 3, getJson().c_str(),
+                      MC_UDP.androidPort);
   } else {
     MC_Mesh.publishToAll(Cube.getJson());
   }

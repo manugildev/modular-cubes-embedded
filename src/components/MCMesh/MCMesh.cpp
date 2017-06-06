@@ -25,6 +25,8 @@ void MCMesh::loop() { mesh.update(); }
 void MCMesh::setUpCallbacks() {
   mesh.onNewConnection([](uint32_t nodeId) {
     Serial.printf("  MCMesh -> New Connection, nodeId = %u\n", nodeId);
+    MC_UDP.sendPacket(MC_UDP.androidIP, 1, String(nodeId).c_str(),
+                      MC_UDP.androidPort);
   });
   mesh.onReceive([&](uint32_t from, String &msg) {
     Serial.printf("  MCMesh -> New Message, nodeId = %u, msg = %s\n", from,
@@ -85,6 +87,8 @@ void MCMesh::setUpCallbacks() {
           String childString;
           childsObject.printTo(childString);
           Cube.setChilds(childString);
+          MC_UDP.sendPacket(MC_UDP.androidIP, 2, String(textToWrite).c_str(),
+                            MC_UDP.androidPort);
           // Delete from childs
         }
         Serial.println(Cube.getJson());
@@ -147,9 +151,8 @@ bool MCMesh::parseJsonChilds(String data) {
   String childString;
   childsObject.printTo(childString);
   Cube.setChilds(childString);
+  MC_UDP.sendPacket(MC_UDP.androidIP, 3, data.c_str(), MC_UDP.androidPort);
 
-  String msg = "data=" + Cube.getJson();
-  MC_UDP.sendPacket(MC_UDP.androidIP, msg.c_str(), MC_UDP.androidPort);
   return true;
 }
 

@@ -13,6 +13,7 @@ public:
 private:
   int endTime;
   int startTime;
+  int gameMode = 0;
 };
 
 extern GameLogic GL;
