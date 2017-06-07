@@ -57,12 +57,13 @@ void ModularCube::loop() {
 
 void ModularCube::updateOrientation() {
   currentOrientation = MC_Accelerometer.getCurrentOrientation();
+  currentOrientation = millis();
   Serial.print("--> UpdateOrientation() - Orientation: ");
   Serial.println(currentOrientation);
   if (!Cube.isMaster()) {
     MC_Mesh.publishToAll(getJson());
   } else {
-    MC_UDP.sendPacket(MC_UDP.androidIP, 3, getJson().c_str(),
+    MC_UDP.sendPacket(MC_UDP.androidIP, 3, getJsonNoChilds().c_str(),
                       MC_UDP.androidPort);
   }
 }
@@ -110,6 +111,7 @@ int ModularCube::getCurrentOrientation() { return currentOrientation; }
 bool ModularCube::isMaster() { return master; }
 bool ModularCube::isActivated() { return activated; }
 String ModularCube::getJson() {
+  // With the new system, i dont need to send the childs to the master
   if (isMaster()) {
     return "{\"" + String(MC_Mesh.mesh.getNodeId()) + "\":{\"" + CO_STRING +
            "\":" + getCurrentOrientation() + ",\"" + AC_STRING + "\":" +
@@ -120,5 +122,10 @@ String ModularCube::getJson() {
            isActivated() + "}}";
   }
 }
-
+String ModularCube::getJsonNoChilds() {
+  // With the new system, i dont need to send the childs to the master
+  return "{\"" + String(MC_Mesh.mesh.getNodeId()) + "\":{\"" + CO_STRING +
+         "\":" + getCurrentOrientation() + ",\"" + AC_STRING + "\":" +
+         isActivated() + "}}";
+}
 ModularCube Cube;

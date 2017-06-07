@@ -53,6 +53,9 @@ bool MCUDP::sendPacket(const IPAddress &address, int messageType,
   case Information:
     st = "information=" + String(msg);
     break;
+  case Connections:
+    st = "connections=" + String(msg);
+    break;
   }
 
   udp.write(st.c_str());
@@ -71,14 +74,15 @@ bool MCUDP::receivePacket() {
                   ip.c_str());
     if (String(incomingPacket).indexOf("android") != -1)
       Cube.setMaster(true);
+
     if (Cube.isMaster()) {
       // This is for the firs message the app sends
-      if (String(incomingPacket).indexOf("android") != -1) {
+      if (String(incomingPacket).startsWith("android") != -1) {
         // sendPacket(udp.remoteIP(), replyPacket, udp.remotePort());
         parseAndroidPacket(udp.remoteIP(), udp.remotePort(),
                            String(incomingPacket));
-        MC_UDP.sendPacket(MC_UDP.androidIP, Initial, Cube.getJson().c_str(),
-                          MC_UDP.androidPort);
+        MC_UDP.sendPacket(MC_UDP.androidIP, Initial,
+                          Cube.getJsonNoChilds().c_str(), MC_UDP.androidPort);
       } else {
         parseAndroidPacket(udp.remoteIP(), udp.remotePort(),
                            String(incomingPacket));
@@ -91,6 +95,22 @@ bool MCUDP::receivePacket() {
       // parseIncomingPacket(String(incomingPacket));
     }
     return true;
+  }
+  return false;
+}
+
+bool MCUDP::parseAndroidPacket(IPAddress ip, uint32_t port,
+                               String incomingPacket) {
+  androidIP = ip;
+  androidPort = port;
+  if (incomingPacket.indexOf("lIP") != -1) {
+    parseActivate(incomingPacket);
+  } else if (incomingPacket.indexOf("gamemode") != -1) {
+    parseGameMode(incomingPacket);
+  } else if (incomingPacket.indexOf("connections") != -1) {
+    MC_UDP.sendPacket(MC_UDP.androidIP, 4,
+                      MC_Mesh.mesh.subConnectionJson().c_str(),
+                      MC_UDP.androidPort);
   }
   return false;
 }
@@ -120,14 +140,6 @@ bool MCUDP::parseActivate(String response) {
   return false;
 }
 
-bool MCUDP::parseAndroidPacket(IPAddress ip, uint32_t port,
-                               String incomingPacket) {
-  androidIP = ip;
-  androidPort = port;
-  if (incomingPacket.indexOf("lIP") != -1) {
-    parseActivate(incomingPacket);
-  }
-  return false;
-}
+bool MCUDP::parseGameMode(String gameMode) {}
 
 MCUDP MC_UDP;

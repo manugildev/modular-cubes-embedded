@@ -12,7 +12,7 @@ painlessMesh mesh;
 void MCMesh::setup() {
   t0 = millis();
   setMasterIfMeshDoesNotExist();
-  mesh.setDebugMsgTypes(ERROR);
+  mesh.setDebugMsgTypes(ERROR /*| COMMUNICATION | MESH_STATUS | DEBUG*/);
   mesh.init(MESH_PREFIX, MESH_PASSWORD, MESH_PORT, STA_AP, AUTH_WPA2_PSK, 1,
             PHY_MODE_11G, 82, !Cube.isMaster(), 4);
 
@@ -25,8 +25,10 @@ void MCMesh::loop() { mesh.update(); }
 void MCMesh::setUpCallbacks() {
   mesh.onNewConnection([](uint32_t nodeId) {
     Serial.printf("  MCMesh -> New Connection, nodeId = %u\n", nodeId);
-    MC_UDP.sendPacket(MC_UDP.androidIP, 1, String(nodeId).c_str(),
-                      MC_UDP.androidPort);
+    if (Cube.isMaster()) {
+      MC_UDP.sendPacket(MC_UDP.androidIP, 1, String(nodeId).c_str(),
+                        MC_UDP.androidPort);
+    }
   });
   mesh.onReceive([&](uint32_t from, String &msg) {
     Serial.printf("  MCMesh -> New Message, nodeId = %u, msg = %s\n", from,
@@ -40,6 +42,7 @@ void MCMesh::setUpCallbacks() {
       parseIncomingPacket(from, msg);
     }
   });
+
   mesh.onChangedConnections([&]() {
     if (Cube.isMaster()) {
       DynamicJsonBuffer jsonBuffer;
@@ -78,18 +81,14 @@ void MCMesh::setUpCallbacks() {
         }
 
         if (!contains && *itr != mesh.getNodeId()) {
-          // Serial.print("ChildList: ");
           char textToWrite[16];
           sprintf(textToWrite, "%lu", *itr);
-          //  Serial.print(textToWrite);
-          //  Serial.println(" Contains = false");
           childsObject.remove(textToWrite);
           String childString;
           childsObject.printTo(childString);
           Cube.setChilds(childString);
           MC_UDP.sendPacket(MC_UDP.androidIP, 2, String(textToWrite).c_str(),
                             MC_UDP.androidPort);
-          // Delete from childs
         }
         Serial.println(Cube.getJson());
       }
@@ -151,6 +150,7 @@ bool MCMesh::parseJsonChilds(String data) {
   String childString;
   childsObject.printTo(childString);
   Cube.setChilds(childString);
+  // TODO: No childs in the new system, yes for checking, no for sending
   MC_UDP.sendPacket(MC_UDP.androidIP, 3, data.c_str(), MC_UDP.androidPort);
 
   return true;

@@ -24,6 +24,7 @@ public:
   String getAPName();
   String getChilds();
   String getJson();
+  String getJsonNoChilds();
   String getFJson();
   WiFiMode getConnectionMode();
   int getCurrentOrientation();

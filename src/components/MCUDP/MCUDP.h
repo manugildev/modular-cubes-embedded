@@ -7,7 +7,8 @@ public:
     Initial = 0,
     Connection = 1,
     Disconnection = 2,
-    Information = 3
+    Information = 3,
+    Connections = 4
   };
   MessageType msgType;
 
@@ -20,6 +21,7 @@ public:
   bool parseIncomingPacket(String data);
   bool parseAndroidPacket(IPAddress ip, uint32_t port, String incomingPacket);
   bool parseActivate(String response);
+  bool parseGameMode(String gamemode);
   IPAddress androidIP = IPAddress();
   uint32_t androidPort = -1;
 
