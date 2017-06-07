@@ -57,7 +57,6 @@ bool MCUDP::sendPacket(const IPAddress &address, int messageType,
     st = "connections=" + String(msg);
     break;
   }
-
   udp.write(st.c_str());
   return (udp.endPacket() == 1);
 }
@@ -76,17 +75,17 @@ bool MCUDP::receivePacket() {
       Cube.setMaster(true);
 
     if (Cube.isMaster()) {
-      // This is for the firs message the app sends
-      if (String(incomingPacket).startsWith("android") != -1) {
-        // sendPacket(udp.remoteIP(), replyPacket, udp.remotePort());
+      // This is for the first message the app sends
+      if (String(incomingPacket).indexOf("android") != -1) {
         parseAndroidPacket(udp.remoteIP(), udp.remotePort(),
                            String(incomingPacket));
+        Serial.println("initial running");
+        Serial.println(incomingPacket);
         MC_UDP.sendPacket(MC_UDP.androidIP, Initial,
                           Cube.getJsonNoChilds().c_str(), MC_UDP.androidPort);
       } else {
         parseAndroidPacket(udp.remoteIP(), udp.remotePort(),
                            String(incomingPacket));
-        // sendPacket(udp.remoteIP(), replyPacket, udp.remotePort());
       }
       // parseJsonChilds(String(incomingPacket));
     } else {
@@ -103,11 +102,13 @@ bool MCUDP::parseAndroidPacket(IPAddress ip, uint32_t port,
                                String incomingPacket) {
   androidIP = ip;
   androidPort = port;
+  // Serial.println(incomingPacket);
   if (incomingPacket.indexOf("lIP") != -1) {
     parseActivate(incomingPacket);
   } else if (incomingPacket.indexOf("gamemode") != -1) {
     parseGameMode(incomingPacket);
   } else if (incomingPacket.indexOf("connections") != -1) {
+    MC_Mesh.publishToAll("Hi");
     MC_UDP.sendPacket(MC_UDP.androidIP, 4,
                       MC_Mesh.mesh.subConnectionJson().c_str(),
                       MC_UDP.androidPort);
@@ -127,8 +128,10 @@ bool MCUDP::parseActivate(String response) {
         MC_Mesh.publish(lIP.toInt(), array[i].as<String>());
       } else {
         int activated = array[i][AC_STRING].as<int>();
-        if (!activated) {
-          // GL.switchRandomLightInMesh(+50);
+        if (Cube.isActivated()) {
+          Cube.setActivated(false);
+        } else {
+          Cube.setActivated(true);
         }
       }
     }

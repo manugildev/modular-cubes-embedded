@@ -18,7 +18,7 @@ ModularCube::ModularCube() {
   setCurrentOrientation(0);
   setMaster(false);
   setChilds("{}");
-  setActivated(false);
+  setActivated(true);
 }
 
 /****************************************************************************
@@ -53,11 +53,16 @@ void ModularCube::loop() {
     // This will update only every 100ms
     MC_Accelerometer.loop();
   }
+  if (Cube.isActivated()) {
+    digitalWrite(2, LOW);
+  } else {
+    digitalWrite(2, HIGH);
+  }
 }
 
 void ModularCube::updateOrientation() {
   currentOrientation = MC_Accelerometer.getCurrentOrientation();
-  currentOrientation = millis();
+  // currentOrientation = millis();
   Serial.print("--> UpdateOrientation() - Orientation: ");
   Serial.println(currentOrientation);
   if (!Cube.isMaster()) {
@@ -90,11 +95,11 @@ void ModularCube::setCurrentOrientation(int cO) { currentOrientation = cO; }
 void ModularCube::setMaster(bool m) { master = m; }
 void ModularCube::setActivated(bool a) {
   activated = a;
-  if (isMaster()) {
-    MC_UDP.sendPacket(MC_UDP.androidIP, 3, getJson().c_str(),
-                      MC_UDP.androidPort);
+  if (!Cube.isMaster()) {
+    MC_Mesh.publishToAll(getJson());
   } else {
-    MC_Mesh.publishToAll(Cube.getJson());
+    MC_UDP.sendPacket(MC_UDP.androidIP, 3, getJsonNoChilds().c_str(),
+                      MC_UDP.androidPort);
   }
 }
 

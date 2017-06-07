@@ -150,9 +150,7 @@ bool MCMesh::parseJsonChilds(String data) {
   String childString;
   childsObject.printTo(childString);
   Cube.setChilds(childString);
-  // TODO: No childs in the new system, yes for checking, no for sending
   MC_UDP.sendPacket(MC_UDP.androidIP, 3, data.c_str(), MC_UDP.androidPort);
-
   return true;
 }
 
@@ -160,11 +158,11 @@ bool MCMesh::parseIncomingPacket(uint32_t master, String data) {
   DynamicJsonBuffer jsonBuffer;
   JsonObject &root = jsonBuffer.parseObject(data);
   if (root.success()) {
-    if (data.indexOf("light") != -1) {
-      return parseGameLight(data);
-    } else {
-      return parseActivate(master, data);
-    }
+    // if (data.indexOf("light") != -1) {
+    //   return parseGameLight(data);
+    // } else {
+    return parseActivate(master, data);
+    // }
   } else {
     Serial.println("  MCMesh::parseIncomingPacket, parsing Json failed.");
     return false;
@@ -191,9 +189,11 @@ bool MCMesh::parseActivate(uint32_t master, String data) {
   JsonObject &root = jsonBuffer.parseObject(data);
   String lIP = root[LI_STRING];
   int activated = root[AC_STRING].as<int>();
-  if (!activated) {
-    // GL.switchRandomLightInMesh(+50);
-    return true;
+  if (lIP.toInt() == Cube.getDeviceId()) {
+    if (Cube.isActivated())
+      Cube.setActivated(false);
+    else
+      Cube.setActivated(true);
   }
   return false;
 }
