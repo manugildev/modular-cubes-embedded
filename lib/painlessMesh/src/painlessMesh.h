@@ -20,9 +20,9 @@ extern "C" {
 
 #include "painlessMeshSync.h"
 
-#define NODE_TIMEOUT        3000000  //uSecs
+#define NODE_TIMEOUT        5000000  //uSecs
 #define JSON_BUFSIZE        300 // initial size for the DynamicJsonBuffers.
-#define MIN_FREE_MEMORY     16000 // Minimum free memory, besides here all packets in queue are discarded.
+#define MIN_FREE_MEMORY     10000 // Minimum free memory, besides here all packets in queue are discarded.
 #define MAX_MESSAGE_QUEUE   50 // MAX number of unsent messages in queue. Newer messages are discarded
 #define MAX_CONSECUTIVE_SEND 5 // Max message busrt
 
@@ -92,7 +92,7 @@ struct meshConnectionType {
     uint32_t            timeSyncLastRequested = 0; // Timestamp to be compared in manageConnections() to check response for timeout
     uint32_t            timeDelayLastRequested = 0; // Timestamp to be compared in manageConnections() to check response for timeout
     uint32_t            lastTimeSync = 0; // Timestamp to trigger periodic time sync
-    uint32_t            nextTimeSyncPeriod = 0; // 
+    uint32_t            nextTimeSyncPeriod = 0; //
 
     bool                sendReady = true;
     SimpleList<String>  sendQueue;

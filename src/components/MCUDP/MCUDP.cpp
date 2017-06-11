@@ -108,7 +108,6 @@ bool MCUDP::parseAndroidPacket(IPAddress ip, uint32_t port,
   } else if (incomingPacket.indexOf("gamemode") != -1) {
     parseGameMode(incomingPacket);
   } else if (incomingPacket.indexOf("connections") != -1) {
-    MC_Mesh.publishToAll("Hi");
     MC_UDP.sendPacket(MC_UDP.androidIP, 4,
                       MC_Mesh.mesh.subConnectionJson().c_str(),
                       MC_UDP.androidPort);

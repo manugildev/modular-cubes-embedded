@@ -6,6 +6,7 @@
 class MCMesh {
 public:
   int t0;
+  uint32_t masterId = 0;
   painlessMesh mesh;
 
   void setup();
@@ -13,6 +14,9 @@ public:
   void setUpCallbacks();
   bool publish(uint32_t destId, String msg);
   bool publishToAll(String msg);
+
+  void setMasterId(uint32_t masterId);
+  bool publishToMaster(String msg);
 
   bool checkIfMeshExists(const char *ssid, int wait = 0);
   void setMasterIfMeshDoesNotExist();

@@ -20,26 +20,45 @@ void MCMesh::setup() {
   Cube.setDeviceID(mesh.getNodeId());
 }
 
-void MCMesh::loop() { mesh.update(); }
+void MCMesh::loop() {
+  mesh.update();
+  if ((millis() - t0) > 1000  && !Cube.isMaster() && masterId==0) {
+    t0 = millis();
+    publishToAll("master?");
+  }
+
+}
 
 void MCMesh::setUpCallbacks() {
-  mesh.onNewConnection([](uint32_t nodeId) {
+  mesh.onNewConnection([&](uint32_t nodeId) {
     Serial.printf("  MCMesh -> New Connection, nodeId = %u\n", nodeId);
     if (Cube.isMaster()) {
       MC_UDP.sendPacket(MC_UDP.androidIP, 1, String(nodeId).c_str(),
                         MC_UDP.androidPort);
+      String msg = "master=" + String(mesh.getNodeId());
+      MC_Mesh.publish(nodeId, msg.c_str());
     }
   });
+
   mesh.onReceive([&](uint32_t from, String &msg) {
     Serial.printf("  MCMesh -> New Message, nodeId = %u, msg = %s\n", from,
                   msg.c_str());
     if (Cube.isMaster()) {
-      if (msg.indexOf("light") == -1)
+      if (msg.indexOf("light") != -1) {
+          parseIncomingPacket(from, msg);
+      } else if (msg.indexOf("master?") != -1) {
+        String response = "master=" + String(mesh.getNodeId());
+        MC_Mesh.publish(from, response.c_str());
+      } else {
         parseJsonChilds(msg);
-      else
-        parseIncomingPacket(from, msg);
+      }
     } else {
-      parseIncomingPacket(from, msg);
+      //Serial.println(msg);
+      if (msg.indexOf("master=") != -1) {
+        masterId = from;
+      }else{
+        parseIncomingPacket(from, msg);
+      }
     }
   });
 
@@ -59,10 +78,10 @@ void MCMesh::setUpCallbacks() {
       for (JsonObject::iterator it = childsObject.begin();
            it != childsObject.end(); ++it) {
         const char *key = it->key;
-        Serial.println(key);
+        // Serial.println(key);
         uint32_t id = strtoul(key, NULL, 10);
         const uint32_t number = id;
-        Serial.println(number);
+        // Serial.println(number);
         childList.push_back(number);
       }
 
@@ -90,17 +109,35 @@ void MCMesh::setUpCallbacks() {
           MC_UDP.sendPacket(MC_UDP.androidIP, 2, String(textToWrite).c_str(),
                             MC_UDP.androidPort);
         }
-        Serial.println(Cube.getJson());
+        // Serial.println(Cube.getJson());
       }
     }
   });
 }
 
+void MCMesh::setMasterId(uint32_t masterId){
+  masterId = masterId;
+}
+
 bool MCMesh::publish(uint32_t destId, String msg) {
+  //Serial.println("DestID:" + String(destId) + " " + msg);
   return mesh.sendSingle(destId, msg);
 }
 
-bool MCMesh::publishToAll(String msg) { return mesh.sendBroadcast(msg); }
+bool MCMesh::publishToMaster(String msg) {
+  Serial.println(masterId);
+  if(masterId == 0){
+      publishToAll("master?");
+      //return mesh.sendSingle(masterId, msg);
+  } else {
+    return publish(masterId, msg);
+  }
+}
+
+bool MCMesh::publishToAll(String msg) {
+  Serial.println("PublishToAll: " + msg);
+  return mesh.sendBroadcast(msg);
+}
 
 void MCMesh::setMasterIfMeshDoesNotExist() {
   if (checkIfMeshExists(MESH_PREFIX)) {
@@ -140,7 +177,7 @@ bool MCMesh::parseJsonChilds(String data) {
   JsonObject &receivedData = jsonBuffer.parseObject(data);
 
   if (!receivedData.success()) {
-    Serial.println("Error: MCUDP::savePacketToJson, couldn't parse the Json");
+    Serial.println("Error: MCMesh::parseJsonChilds, couldn't parse the Json");
     return false;
   }
   // Update if the value does not exist
