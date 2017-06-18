@@ -22,6 +22,7 @@ public:
   bool parseAndroidPacket(IPAddress ip, uint32_t port, String incomingPacket);
   bool parseActivate(String response);
   bool parseGameMode(String gamemode);
+  bool parseAllPackage(String gamemode);
   IPAddress androidIP = IPAddress();
   uint32_t androidPort = -1;
 

@@ -2,9 +2,6 @@
 //  painlessMeshConnection.cpp
 //
 //
-//  Created by Bill Gray on 7/26/16.
-//
-//
 
 #include <Arduino.h>
 #include <ArduinoJson.h>

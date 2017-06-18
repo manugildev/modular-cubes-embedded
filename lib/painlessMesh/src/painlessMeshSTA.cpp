@@ -1,9 +1,5 @@
 //
 //  painlessMeshSTA.cpp
-//  
-//
-//  Created by Bill Gray on 7/26/16.
-//
 //
 
 #include <Arduino.h>
@@ -234,7 +230,7 @@ uint32_t ICACHE_FLASH_ATTR painlessMesh::encodeNodeId(uint8_t *hwaddr) {
     debugMsg(GENERAL, "encodeNodeId():\n");
     uint32 value = 0;
 
-    value |= hwaddr[2] << 24; //Big endian (aka "network order"):
+    value |= hwaddr[2] << 24;
     value |= hwaddr[3] << 16;
     value |= hwaddr[4] << 8;
     value |= hwaddr[5];

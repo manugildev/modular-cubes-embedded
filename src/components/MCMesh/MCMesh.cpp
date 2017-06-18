@@ -11,6 +11,7 @@ painlessMesh mesh;
 
 void MCMesh::setup() {
   t0 = millis();
+  // TODO: No need of this
   setMasterIfMeshDoesNotExist();
   mesh.setDebugMsgTypes(ERROR /*| COMMUNICATION | MESH_STATUS | DEBUG*/);
   mesh.init(MESH_PREFIX, MESH_PASSWORD, MESH_PORT, STA_AP, AUTH_WPA2_PSK, 1,
@@ -22,11 +23,10 @@ void MCMesh::setup() {
 
 void MCMesh::loop() {
   mesh.update();
-  if ((millis() - t0) > 1000  && !Cube.isMaster() && masterId==0) {
+  if ((millis() - t0) > 1000 && !Cube.isMaster() && masterId == 0) {
     t0 = millis();
     publishToAll("master?");
   }
-
 }
 
 void MCMesh::setUpCallbacks() {
@@ -45,7 +45,7 @@ void MCMesh::setUpCallbacks() {
                   msg.c_str());
     if (Cube.isMaster()) {
       if (msg.indexOf("light") != -1) {
-          parseIncomingPacket(from, msg);
+        parseIncomingPacket(from, msg);
       } else if (msg.indexOf("master?") != -1) {
         String response = "master=" + String(mesh.getNodeId());
         MC_Mesh.publish(from, response.c_str());
@@ -53,10 +53,14 @@ void MCMesh::setUpCallbacks() {
         parseJsonChilds(msg);
       }
     } else {
-      //Serial.println(msg);
+      // Serial.println(msg);
       if (msg.indexOf("master=") != -1) {
         masterId = from;
-      }else{
+      } else if (msg.indexOf("start") != -1) {
+        Cube.setActivated(true);
+      } else if (msg.indexOf("stop") != -1) {
+        Cube.setActivated(false);
+      } else {
         parseIncomingPacket(from, msg);
       }
     }
@@ -115,20 +119,17 @@ void MCMesh::setUpCallbacks() {
   });
 }
 
-void MCMesh::setMasterId(uint32_t masterId){
-  masterId = masterId;
-}
+void MCMesh::setMasterId(uint32_t masterId) { masterId = masterId; }
 
 bool MCMesh::publish(uint32_t destId, String msg) {
-  //Serial.println("DestID:" + String(destId) + " " + msg);
+  // Serial.println("DestID:" + String(destId) + " " + msg);
   return mesh.sendSingle(destId, msg);
 }
 
 bool MCMesh::publishToMaster(String msg) {
   Serial.println(masterId);
-  if(masterId == 0){
-      publishToAll("master?");
-      //return mesh.sendSingle(masterId, msg);
+  if (masterId == 0) {
+    publishToAll("master?");
   } else {
     return publish(masterId, msg);
   }
@@ -140,6 +141,7 @@ bool MCMesh::publishToAll(String msg) {
 }
 
 void MCMesh::setMasterIfMeshDoesNotExist() {
+  // Todo: Check if this needs to be changed
   if (checkIfMeshExists(MESH_PREFIX)) {
     Serial.println("MCMesh -> Mesh FOUND");
     Cube.setMaster(false);

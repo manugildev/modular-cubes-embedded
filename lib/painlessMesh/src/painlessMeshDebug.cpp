@@ -1,9 +1,5 @@
 //
 //  painlessMeshDebug.cpp
-//  
-//
-//  Created by Bill Gray on 8/18/16.
-//
 //
 
 #include <Arduino.h>

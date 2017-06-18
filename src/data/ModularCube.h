@@ -30,6 +30,7 @@ public:
   int getCurrentOrientation();
   bool isMaster();
   bool isActivated();
+
   // Other Methods
   void setup();
   void loop();

@@ -111,8 +111,21 @@ bool MCUDP::parseAndroidPacket(IPAddress ip, uint32_t port,
     MC_UDP.sendPacket(MC_UDP.androidIP, 4,
                       MC_Mesh.mesh.subConnectionJson().c_str(),
                       MC_UDP.androidPort);
+  } else if (incomingPacket.indexOf("all") != -1) {
+    parseAllPackage(incomingPacket);
   }
   return false;
+}
+
+bool MCUDP::parseAllPackage(String response) {
+  response.replace("all=", "");
+  if (response.indexOf("start") != -1) {
+    Cube.setActivated(true);
+    MC_Mesh.publishToAll("start");
+  } else if (response.indexOf("stop") != -1) {
+    Cube.setActivated(false);
+    MC_Mesh.publishToAll("stop");
+  }
 }
 
 bool MCUDP::parseActivate(String response) {
