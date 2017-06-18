@@ -1,15 +1,15 @@
 //
-//  painlessMeshDebug.cpp
+//  modularMeshDebug.cpp
 //
 
 #include <Arduino.h>
 #include <stdarg.h>
 
-#include "painlessMesh.h"
+#include "modularMesh.h"
 
 uint16_t types = 0;
 
-void painlessMesh::setDebugMsgTypes(uint16_t newTypes) {
+void modularMesh::setDebugMsgTypes(uint16_t newTypes) {
     // set the different kinds of debug messages you want to generate.
     types = newTypes;
     Serial.printf("\nsetDebugTypes 0x%x\n", types);
@@ -17,7 +17,7 @@ void painlessMesh::setDebugMsgTypes(uint16_t newTypes) {
 
 // To assign a debug message to several type use | (bitwise or) operator
 // Example: debugMsg( GENERAL | CONNECTION , "Debug message");
-void painlessMesh::debugMsg(debugType type, const char* format ...) {
+void modularMesh::debugMsg(debugType type, const char* format ...) {
 
     if (type & types) {  //Print only the message types set for output
         char str[200];

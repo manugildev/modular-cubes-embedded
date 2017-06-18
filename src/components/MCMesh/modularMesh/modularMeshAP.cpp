@@ -7,12 +7,12 @@ extern "C" {
 #include "espconn.h"
 }
 
-#include "painlessMesh.h"
+#include "modularMesh.h"
 
 
 // AP functions
 //***********************************************************************
-void ICACHE_FLASH_ATTR painlessMesh::apInit(void) {
+void ICACHE_FLASH_ATTR modularMesh::apInit(void) {
     //    String password( MESH_PASSWORD );
 
     ip_addr ip, netmask;
@@ -59,7 +59,7 @@ void ICACHE_FLASH_ATTR painlessMesh::apInit(void) {
 }
 
 //***********************************************************************
-void ICACHE_FLASH_ATTR painlessMesh::tcpServerInit(espconn &serverConn, esp_tcp &serverTcp, espconn_connect_callback connectCb, uint32 port) {
+void ICACHE_FLASH_ATTR modularMesh::tcpServerInit(espconn &serverConn, esp_tcp &serverTcp, espconn_connect_callback connectCb, uint32 port) {
 
     debugMsg(GENERAL, "tcpServerInit():\n");
 

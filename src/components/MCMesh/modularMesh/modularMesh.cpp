@@ -1,23 +1,23 @@
 #include <Arduino.h>
 #include <ArduinoJson.h>
-#include <SimpleList.h>
+#include <components/MCMesh/modularMesh/SimpleList.h>
 
 extern "C" {
 #include "user_interface.h"
 #include "espconn.h"
 }
 
-#include "painlessMesh.h"
-#include "painlessMeshSync.h"
+#include "modularMesh.h"
+#include "modularMeshSync.h"
 
 
-painlessMesh* staticThis;
+modularMesh* staticThis;
 uint16_t  count = 0;
 
 
 // general functions
 //***********************************************************************
-void ICACHE_FLASH_ATTR painlessMesh::init(String ssid, String password, uint16_t port, nodeMode connectMode, _auth_mode authmode, uint8_t channel, phy_mode_t phymode, uint8_t maxtpw, uint8_t hidden, uint8_t maxconn) {
+void ICACHE_FLASH_ATTR modularMesh::init(String ssid, String password, uint16_t port, nodeMode connectMode, _auth_mode authmode, uint8_t channel, phy_mode_t phymode, uint8_t maxtpw, uint8_t hidden, uint8_t maxconn) {
     // shut everything down, start with a blank slate.
     debugMsg(STARTUP, "init(): %d\n", wifi_station_set_auto_connect(0)); // Disable autoconnect
 
@@ -72,25 +72,25 @@ void ICACHE_FLASH_ATTR painlessMesh::init(String ssid, String password, uint16_t
 }
 
 //***********************************************************************
-void ICACHE_FLASH_ATTR painlessMesh::update(void) {
+void ICACHE_FLASH_ATTR modularMesh::update(void) {
     manageStation();
     manageConnections();
     return;
 }
 
 //***********************************************************************
-bool ICACHE_FLASH_ATTR painlessMesh::sendSingle(uint32_t &destId, String &msg) {
+bool ICACHE_FLASH_ATTR modularMesh::sendSingle(uint32_t &destId, String &msg) {
     debugMsg(COMMUNICATION, "sendSingle(): dest=%d msg=%s\n", destId, msg.c_str());
     return sendMessage(destId, _nodeId, SINGLE, msg);
 }
 
 //***********************************************************************
-bool ICACHE_FLASH_ATTR painlessMesh::sendBroadcast(String &msg) {
+bool ICACHE_FLASH_ATTR modularMesh::sendBroadcast(String &msg) {
     debugMsg(COMMUNICATION, "sendBroadcast(): msg=%s\n", msg.c_str());
     return broadcastMessage(_nodeId, BROADCAST, msg);
 }
 
-bool ICACHE_FLASH_ATTR painlessMesh::startDelayMeas(uint32_t nodeId) {
+bool ICACHE_FLASH_ATTR modularMesh::startDelayMeas(uint32_t nodeId) {
     String timeStamp;
     meshConnectionType *conn;
     debugMsg(S_TIME, "startDelayMeas(): NodeId %u\n", nodeId);

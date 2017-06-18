@@ -1,31 +1,31 @@
 //
-//  painlessMeshSTA.cpp
+//  modularMeshSTA.cpp
 //
 
 #include <Arduino.h>
-#include <SimpleList.h>
+#include <components/MCMesh/modularMesh/SimpleList.h>
 
 extern "C" {
 #include "user_interface.h"
 #include "espconn.h"
 }
 
-#include "painlessMesh.h"
+#include "modularMesh.h"
 
 
 
-extern painlessMesh* staticThis;
+extern modularMesh* staticThis;
 
 // Station functions
 //***********************************************************************
-void ICACHE_FLASH_ATTR painlessMesh::stationInit(void) {
+void ICACHE_FLASH_ATTR modularMesh::stationInit(void) {
     debugMsg(STARTUP, "stationInit():\n");
     startStationScan();
     return;
 }
 
 //***********************************************************************
-void ICACHE_FLASH_ATTR painlessMesh::manageStation(void) {
+void ICACHE_FLASH_ATTR modularMesh::manageStation(void) {
     debugMsg(GENERAL, "manageStation():\n");
 
     static uint8_t previousStatus;
@@ -63,7 +63,7 @@ void ICACHE_FLASH_ATTR painlessMesh::manageStation(void) {
 
 //***********************************************************************
 // Starts scan for APs whose name is Mesh SSID
-void ICACHE_FLASH_ATTR painlessMesh::startStationScan(void) {
+void ICACHE_FLASH_ATTR modularMesh::startStationScan(void) {
     debugMsg(GENERAL, "startStationScan():\n");
 
     if (_scanStatus != IDLE) { // Already scanning
@@ -91,7 +91,7 @@ void ICACHE_FLASH_ATTR painlessMesh::startStationScan(void) {
 
 //***********************************************************************
 // Starts AP scan, triggered by a timer every SCAN_INTERVAL ms
-void ICACHE_FLASH_ATTR painlessMesh::scanTimerCallback(void *arg) {
+void ICACHE_FLASH_ATTR modularMesh::scanTimerCallback(void *arg) {
     //os_timer_disarm(&staticThis->_scanTimer);
     staticThis->startStationScan();
 
@@ -100,7 +100,7 @@ void ICACHE_FLASH_ATTR painlessMesh::scanTimerCallback(void *arg) {
 
 //***********************************************************************
 // Station scan callback
-void ICACHE_FLASH_ATTR painlessMesh::stationScanCb(void *arg, STATUS status) {
+void ICACHE_FLASH_ATTR modularMesh::stationScanCb(void *arg, STATUS status) {
     char ssid[32];
     bss_info *bssInfo = (bss_info *) arg;
     staticThis->debugMsg(CONNECTION, "stationScanCb():-- > scan finished @ %u < --\n", staticThis->getNodeTime());
@@ -120,7 +120,7 @@ void ICACHE_FLASH_ATTR painlessMesh::stationScanCb(void *arg, STATUS status) {
 }
 
 //***********************************************************************
-bool ICACHE_FLASH_ATTR painlessMesh::connectToBestAP(void) {
+bool ICACHE_FLASH_ATTR modularMesh::connectToBestAP(void) {
     debugMsg(CONNECTION, "connectToBestAP():");
     uint32_t apNodeId = 0;
 
@@ -181,7 +181,7 @@ bool ICACHE_FLASH_ATTR painlessMesh::connectToBestAP(void) {
 }
 
 //***********************************************************************
-void ICACHE_FLASH_ATTR painlessMesh::tcpConnect(void) {
+void ICACHE_FLASH_ATTR modularMesh::tcpConnect(void) {
     debugMsg(GENERAL, "tcpConnect():\n");
 
     struct ip_info ipconfig;
@@ -226,7 +226,7 @@ void ICACHE_FLASH_ATTR painlessMesh::tcpConnect(void) {
 }
 //***********************************************************************
 // Calculate NodeID from a hardware MAC address
-uint32_t ICACHE_FLASH_ATTR painlessMesh::encodeNodeId(uint8_t *hwaddr) {
+uint32_t ICACHE_FLASH_ATTR modularMesh::encodeNodeId(uint8_t *hwaddr) {
     debugMsg(GENERAL, "encodeNodeId():\n");
     uint32 value = 0;
 

@@ -1,13 +1,12 @@
-#pragma once
-
 #include <Arduino.h>
-#include <painlessMesh.h>
 
-class MCMesh {
+#include <components/MCMesh/modularMesh/modularMesh.h>
+
+class MCMesh { 
 public:
   int t0;
   uint32_t masterId = 0;
-  painlessMesh mesh;
+  modularMesh mesh;
 
   void setup();
   void loop();

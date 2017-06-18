@@ -7,7 +7,7 @@
 #include <configuration/Configuration.h>
 #include <data/ModularCube.h>
 
-painlessMesh mesh;
+modularMesh mesh;
 
 void MCMesh::setup() {
   t0 = millis();

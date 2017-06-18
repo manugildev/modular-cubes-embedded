@@ -1,55 +1,55 @@
 //
-//  painlessMeshConnection.cpp
+//  modularMeshConnection.cpp
 //
 //
 
 #include <Arduino.h>
 #include <ArduinoJson.h>
-#include <SimpleList.h>
+#include <components/MCMesh/modularMesh/SimpleList.h>
 
 extern "C" {
 #include "user_interface.h"
 #include "espconn.h"
 }
 
-#include "painlessMesh.h"
+#include "modularMesh.h"
 
-extern painlessMesh* staticThis;
+extern modularMesh* staticThis;
 
 // connection managment functions
 //***********************************************************************
-void ICACHE_FLASH_ATTR painlessMesh::onReceive(receivedCallback_t  cb) {
+void ICACHE_FLASH_ATTR modularMesh::onReceive(receivedCallback_t  cb) {
     debugMsg(GENERAL, "onReceive():\n");
     receivedCallback = cb;
 }
 
 //***********************************************************************
-void ICACHE_FLASH_ATTR painlessMesh::onNewConnection(newConnectionCallback_t cb) {
+void ICACHE_FLASH_ATTR modularMesh::onNewConnection(newConnectionCallback_t cb) {
     debugMsg(GENERAL, "onNewConnection():\n");
     newConnectionCallback = cb;
 }
 
 //***********************************************************************
-void ICACHE_FLASH_ATTR painlessMesh::onChangedConnections(changedConnectionsCallback_t cb) {
+void ICACHE_FLASH_ATTR modularMesh::onChangedConnections(changedConnectionsCallback_t cb) {
     debugMsg(GENERAL, "onChangedConnections():\n");
     changedConnectionsCallback = cb;
 }
 
 //***********************************************************************
-void ICACHE_FLASH_ATTR painlessMesh::onNodeTimeAdjusted(nodeTimeAdjustedCallback_t cb) {
+void ICACHE_FLASH_ATTR modularMesh::onNodeTimeAdjusted(nodeTimeAdjustedCallback_t cb) {
     debugMsg(GENERAL, "onNodeTimeAdjusted():\n");
     nodeTimeAdjustedCallback = cb;
 }
 
 //***********************************************************************
-void ICACHE_FLASH_ATTR painlessMesh::onNodeDelayReceived(nodeDelayCallback_t cb) {
+void ICACHE_FLASH_ATTR modularMesh::onNodeDelayReceived(nodeDelayCallback_t cb) {
     debugMsg(GENERAL, "onNodeDelayReceived():\n");
     nodeDelayReceivedCallback = cb;
 }
 
 
 //***********************************************************************
-meshConnectionType* ICACHE_FLASH_ATTR painlessMesh::closeConnection(meshConnectionType *conn) {
+meshConnectionType* ICACHE_FLASH_ATTR modularMesh::closeConnection(meshConnectionType *conn) {
     // It seems that more should be done here... perhaps send off a packet to
     // make an attempt to tell the other node that we are closing this conneciton?
     debugMsg(CONNECTION, "closeConnection(): conn-nodeId=%d\n", conn->nodeId);
@@ -58,7 +58,7 @@ meshConnectionType* ICACHE_FLASH_ATTR painlessMesh::closeConnection(meshConnecti
 }
 
 //***********************************************************************
-void ICACHE_FLASH_ATTR painlessMesh::manageConnections(void) {
+void ICACHE_FLASH_ATTR modularMesh::manageConnections(void) {
     debugMsg(GENERAL, "manageConnections():\n");
 
     uint32_t nowNodeTime;
@@ -195,7 +195,7 @@ bool ICACHE_FLASH_ATTR  stringContainsNumber(const String &subConnections,
 
 //***********************************************************************
 // Search for a connection to a given nodeID
-meshConnectionType* ICACHE_FLASH_ATTR painlessMesh::findConnection(uint32_t nodeId) {
+meshConnectionType* ICACHE_FLASH_ATTR modularMesh::findConnection(uint32_t nodeId) {
     debugMsg(GENERAL, "In findConnection(nodeId)\n");
 
     SimpleList<meshConnectionType>::iterator connection = _connections.begin();
@@ -219,7 +219,7 @@ meshConnectionType* ICACHE_FLASH_ATTR painlessMesh::findConnection(uint32_t node
 }
 
 //***********************************************************************
-meshConnectionType* ICACHE_FLASH_ATTR painlessMesh::findConnection(espconn *conn) {
+meshConnectionType* ICACHE_FLASH_ATTR modularMesh::findConnection(espconn *conn) {
     debugMsg(GENERAL, "In findConnection(esp_conn) conn=0x%x\n", conn);
 
     int i = 0;
@@ -237,7 +237,7 @@ meshConnectionType* ICACHE_FLASH_ATTR painlessMesh::findConnection(espconn *conn
 }
 
 //***********************************************************************
-String ICACHE_FLASH_ATTR painlessMesh::subConnectionJson(meshConnectionType *exclude) {
+String ICACHE_FLASH_ATTR modularMesh::subConnectionJson(meshConnectionType *exclude) {
     if (exclude != NULL)
         debugMsg(GENERAL, "subConnectionJson(), exclude=%d\n", exclude->nodeId);
 
@@ -278,7 +278,7 @@ String ICACHE_FLASH_ATTR painlessMesh::subConnectionJson(meshConnectionType *exc
 }
 
 //***********************************************************************
-SimpleList<uint32_t> ICACHE_FLASH_ATTR painlessMesh::getNodeList() {
+SimpleList<uint32_t> ICACHE_FLASH_ATTR modularMesh::getNodeList() {
 
     SimpleList<uint32_t> nodeList;
 
@@ -303,7 +303,7 @@ SimpleList<uint32_t> ICACHE_FLASH_ATTR painlessMesh::getNodeList() {
 }
 
 //***********************************************************************
-uint16_t ICACHE_FLASH_ATTR painlessMesh::connectionCount(meshConnectionType *exclude) {
+uint16_t ICACHE_FLASH_ATTR modularMesh::connectionCount(meshConnectionType *exclude) {
     uint16_t count = 0;
 
     SimpleList<meshConnectionType>::iterator sub = _connections.begin();
@@ -319,7 +319,7 @@ uint16_t ICACHE_FLASH_ATTR painlessMesh::connectionCount(meshConnectionType *exc
 }
 
 //***********************************************************************
-uint16_t ICACHE_FLASH_ATTR painlessMesh::jsonSubConnCount(String& subConns) {
+uint16_t ICACHE_FLASH_ATTR modularMesh::jsonSubConnCount(String& subConns) {
     debugMsg(GENERAL, "jsonSubConnCount(): subConns=%s\n", subConns.c_str());
 
     uint16_t count = 0;
@@ -356,7 +356,7 @@ uint16_t ICACHE_FLASH_ATTR painlessMesh::jsonSubConnCount(String& subConns) {
 // callback which will be called on successful TCP connection (server or client)
 // If we are the station party a node time sync is started
 
-void ICACHE_FLASH_ATTR painlessMesh::meshConnectedCb(void *arg) {
+void ICACHE_FLASH_ATTR modularMesh::meshConnectedCb(void *arg) {
     staticThis->debugMsg(CONNECTION, "meshConnectedCb(): new meshConnection !!!\n");
     meshConnectionType newConn;
     newConn.esp_conn = (espconn *)arg;
@@ -382,7 +382,7 @@ void ICACHE_FLASH_ATTR painlessMesh::meshConnectedCb(void *arg) {
 }
 
 //***********************************************************************
-void ICACHE_FLASH_ATTR painlessMesh::meshRecvCb(void *arg, char *data, unsigned short length) {
+void ICACHE_FLASH_ATTR modularMesh::meshRecvCb(void *arg, char *data, unsigned short length) {
     meshConnectionType *receiveConn = staticThis->findConnection((espconn *)arg);
 
     uint32_t receivedAt = staticThis->getNodeTime();
@@ -459,7 +459,7 @@ void ICACHE_FLASH_ATTR painlessMesh::meshRecvCb(void *arg, char *data, unsigned 
 }
 
 //***********************************************************************
-void ICACHE_FLASH_ATTR painlessMesh::meshSentCb(void *arg) {
+void ICACHE_FLASH_ATTR modularMesh::meshSentCb(void *arg) {
     staticThis->debugMsg(GENERAL, "meshSentCb():\n");    //data sent successfully
     espconn *conn = (espconn*)arg;
     meshConnectionType *meshConnection = staticThis->findConnection(conn);
@@ -489,7 +489,7 @@ void ICACHE_FLASH_ATTR painlessMesh::meshSentCb(void *arg) {
 
 }
 //***********************************************************************
-void ICACHE_FLASH_ATTR painlessMesh::meshDisconCb(void *arg) {
+void ICACHE_FLASH_ATTR modularMesh::meshDisconCb(void *arg) {
     struct espconn *disConn = (espconn *)arg;
 
     staticThis->debugMsg(CONNECTION, "meshDisconCb(): ");
@@ -516,13 +516,13 @@ void ICACHE_FLASH_ATTR painlessMesh::meshDisconCb(void *arg) {
 }
 
 //***********************************************************************
-void ICACHE_FLASH_ATTR painlessMesh::meshReconCb(void *arg, sint8 err) {
+void ICACHE_FLASH_ATTR modularMesh::meshReconCb(void *arg, sint8 err) {
     staticThis->debugMsg(ERROR, "In meshReconCb(): err=%d\n", err);
 }
 
 //***********************************************************************
 // Wifi event handler
-void ICACHE_FLASH_ATTR painlessMesh::wifiEventCb(System_Event_t *event) {
+void ICACHE_FLASH_ATTR modularMesh::wifiEventCb(System_Event_t *event) {
     switch (event->event) {
     case EVENT_STAMODE_CONNECTED:
         staticThis->debugMsg(CONNECTION, "wifiEventCb(): EVENT_STAMODE_CONNECTED ssid=%s\n", (char*)event->event_info.connected.ssid);

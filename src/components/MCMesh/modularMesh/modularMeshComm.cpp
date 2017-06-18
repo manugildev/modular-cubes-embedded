@@ -1,18 +1,18 @@
 //
-//  painlessMeshComm.cpp
+//  modularMeshComm.cpp
 //
 
 #include <Arduino.h>
 #include <ArduinoJson.h>
-#include <SimpleList.h>
+#include <components/MCMesh/modularMesh/SimpleList.h>
 
-#include "painlessMesh.h"
+#include "modularMesh.h"
 
-extern painlessMesh* staticThis;
+extern modularMesh* staticThis;
 
 // communications functions
 //***********************************************************************
-bool ICACHE_FLASH_ATTR painlessMesh::sendMessage(meshConnectionType *conn, uint32_t destId, uint32_t fromId, meshPackageType type, String &msg, bool priority) {
+bool ICACHE_FLASH_ATTR modularMesh::sendMessage(meshConnectionType *conn, uint32_t destId, uint32_t fromId, meshPackageType type, String &msg, bool priority) {
     debugMsg(COMMUNICATION, "sendMessage(conn): conn-nodeId=%d destId=%d type=%d msg=%s\n",
              conn->nodeId, destId, (uint8_t)type, msg.c_str());
 
@@ -22,7 +22,7 @@ bool ICACHE_FLASH_ATTR painlessMesh::sendMessage(meshConnectionType *conn, uint3
 }
 
 //***********************************************************************
-bool ICACHE_FLASH_ATTR painlessMesh::sendMessage(uint32_t destId, uint32_t fromId, meshPackageType type, String &msg, bool priority) {
+bool ICACHE_FLASH_ATTR modularMesh::sendMessage(uint32_t destId, uint32_t fromId, meshPackageType type, String &msg, bool priority) {
     debugMsg(COMMUNICATION, "In sendMessage(destId): destId=%d type=%d, msg=%s\n",
              destId, type, msg.c_str());
 
@@ -37,7 +37,7 @@ bool ICACHE_FLASH_ATTR painlessMesh::sendMessage(uint32_t destId, uint32_t fromI
 
 
 //***********************************************************************
-bool ICACHE_FLASH_ATTR painlessMesh::broadcastMessage(uint32_t from,
+bool ICACHE_FLASH_ATTR modularMesh::broadcastMessage(uint32_t from,
                                                       meshPackageType type,
                                                       String &msg,
                                                       meshConnectionType *exclude) {
@@ -66,7 +66,7 @@ bool ICACHE_FLASH_ATTR painlessMesh::broadcastMessage(uint32_t from,
 }
 
 //***********************************************************************
-bool ICACHE_FLASH_ATTR painlessMesh::sendPackage(meshConnectionType *connection, String &package, bool priority) {
+bool ICACHE_FLASH_ATTR modularMesh::sendPackage(meshConnectionType *connection, String &package, bool priority) {
     debugMsg(COMMUNICATION, "Sending to %d-->%s<--\n", connection->nodeId, package.c_str());
 
     if (package.length() > 1400) {
@@ -114,7 +114,7 @@ bool ICACHE_FLASH_ATTR painlessMesh::sendPackage(meshConnectionType *connection,
 }
 
 //***********************************************************************
-String ICACHE_FLASH_ATTR painlessMesh::buildMeshPackage(uint32_t destId, uint32_t fromId, meshPackageType type, String &msg) {
+String ICACHE_FLASH_ATTR modularMesh::buildMeshPackage(uint32_t destId, uint32_t fromId, meshPackageType type, String &msg) {
     debugMsg(GENERAL, "In buildMeshPackage(): msg=%s\n", msg.c_str());
 
     DynamicJsonBuffer jsonBuffer(JSON_BUFSIZE);

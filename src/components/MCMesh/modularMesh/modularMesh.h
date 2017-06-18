@@ -7,7 +7,7 @@
 
 
 #include <Arduino.h>
-#include <SimpleList.h>
+#include <components/MCMesh/modularMesh/SimpleList.h>
 #include <ArduinoJson.h>
 #include <functional>
 using namespace std;
@@ -18,7 +18,7 @@ extern "C" {
 }
 
 
-#include "painlessMeshSync.h"
+#include "modularMeshSync.h"
 
 #define NODE_TIMEOUT        5000000  //uSecs
 #define JSON_BUFSIZE        300 // initial size for the DynamicJsonBuffers.
@@ -104,23 +104,23 @@ typedef std::function<void()> changedConnectionsCallback_t;
 typedef std::function<void(int32_t offset)> nodeTimeAdjustedCallback_t;
 typedef std::function<void(uint32_t nodeId, int32_t delay)> nodeDelayCallback_t;
 
-class painlessMesh {
+class modularMesh {
 public:
     //inline functions
     uint32_t            getNodeId(void) { return _nodeId; };
 
-    // in painlessMeshDebug.cpp
+    // in modularMeshDebug.cpp
     void                setDebugMsgTypes(uint16_t types);
     void                debugMsg(debugType type, const char* format ...);
 
-    // in painlessMesh.cpp
+    // in modularMesh.cpp
     void                init(String ssid, String password, uint16_t port = 5555, enum nodeMode connectMode = STA_AP, _auth_mode authmode = AUTH_WPA2_PSK, uint8_t channel = 1, phy_mode_t phymode = PHY_MODE_11G, uint8_t maxtpw = 82, uint8_t hidden = 0, uint8_t maxconn = 4);
     void                update(void);
     bool                sendSingle(uint32_t &destId, String &msg);
     bool                sendBroadcast(String &msg);
     bool                startDelayMeas(uint32_t nodeId);
 
-    // in painlessMeshConnection.cpp
+    // in modularMeshConnection.cpp
     void                onReceive(receivedCallback_t  onReceive);
     void                onNewConnection(newConnectionCallback_t onNewConnection);
     void                onChangedConnections(changedConnectionsCallback_t onChangedConnections);
@@ -131,14 +131,14 @@ public:
     bool                isConnected(uint32_t nodeId) { return findConnection(nodeId) != NULL; }
     SimpleList<uint32_t> getNodeList();
 
-    // in painlessMeshSync.cpp
+    // in modularMeshSync.cpp
     uint32_t            getNodeTime(void);
 
 #ifndef UNITY // Make everything public in unit test mode
 protected:
 #endif
 
-    // in painlessMeshComm.cpp
+    // in modularMeshComm.cpp
     //must be accessable from callback
     bool                sendMessage(meshConnectionType *conn, uint32_t destId, uint32_t fromId, meshPackageType type, String &msg, bool priority = false);
     bool                sendMessage(uint32_t destId, uint32_t fromId, meshPackageType type, String &msg, bool priority = false);
@@ -148,7 +148,7 @@ protected:
     String              buildMeshPackage(uint32_t destId, uint32_t fromId, meshPackageType type, String &msg);
 
 
-    // in painlessMeshSync.cpp
+    // in modularMeshSync.cpp
     //must be accessable from callback
     void                startNodeSync(meshConnectionType *conn);
     void                handleNodeSync(meshConnectionType *conn, JsonObject& root);
@@ -157,7 +157,7 @@ protected:
     void                handleTimeDelay(meshConnectionType *conn, JsonObject& root, uint32_t receivedAt);
     bool                adoptionCalc(meshConnectionType *conn);
 
-    // in painlessMeshConnection.cpp
+    // in modularMeshConnection.cpp
     void                manageConnections(void);
     meshConnectionType* findConnection(uint32_t nodeId);
     meshConnectionType* findConnection(espconn *conn);
@@ -169,7 +169,7 @@ protected:
     String              subConnectionJson(meshConnectionType *exclude);
 
 
-    // in painlessMeshSTA.cpp
+    // in modularMeshSTA.cpp
     void                manageStation(void);
     static void         stationScanCb(void *arg, STATUS status);
     static void         scanTimerCallback(void *arg);
@@ -178,12 +178,12 @@ protected:
     void                startStationScan(void);
     uint32_t            encodeNodeId(uint8_t *hwaddr);
 
-    // in painlessMeshAP.cpp
+    // in modularMeshAP.cpp
     void                apInit(void);
     void                tcpServerInit(espconn &serverConn, esp_tcp &serverTcp, espconn_connect_callback connectCb, uint32 port);
 
     // callbacks
-    // in painlessMeshConnection.cpp
+    // in modularMeshConnection.cpp
     static void         wifiEventCb(System_Event_t *event);
     static void         meshConnectedCb(void *arg);
     static void         meshSentCb(void *arg);

@@ -1,16 +1,16 @@
 #include <Arduino.h>
-#include <SimpleList.h>
+#include <components/MCMesh/modularMesh/SimpleList.h>
 #include <ArduinoJson.h>
 
-#include "painlessMesh.h"
-#include "painlessMeshSync.h"
+#include "modularMesh.h"
+#include "modularMeshSync.h"
 
-extern painlessMesh* staticThis;
+extern modularMesh* staticThis;
 uint32_t timeAdjuster = 0;
 
 // timeSync Functions
 //***********************************************************************
-uint32_t ICACHE_FLASH_ATTR painlessMesh::getNodeTime(void) {
+uint32_t ICACHE_FLASH_ATTR modularMesh::getNodeTime(void) {
     uint32_t ret = system_get_time() + timeAdjuster;
 
     debugMsg(GENERAL, "getNodeTime(): time=%u\n", ret);
@@ -95,7 +95,7 @@ int32_t ICACHE_FLASH_ATTR timeSync::calcAdjustment() {
     staticThis->debugMsg(S_TIME, "calcAdjustment(): Start calculation. t0 = %u, t1 = %u, t2 = %u, t3 = %u\n", times[0], times[1], times[2], times[3]);
 
     if (times[0] == 0 || times[1] == 0 || times[2] == 0 || times[3] == 0) {
-        // if any value is 0 
+        // if any value is 0
         staticThis->debugMsg(ERROR, "calcAdjustment(): TimeStamp error.\n");
         return 0xFFFFFFFF; // return max value
     }
@@ -118,7 +118,7 @@ int32_t ICACHE_FLASH_ATTR timeSync::delayCalc() {
     staticThis->debugMsg(S_TIME, "delayCalc(): Start calculation. t0 = %u, t1 = %u, t2 = %u, t3 = %u\n", timeDelay[0], timeDelay[1], timeDelay[2], timeDelay[3]);
 
     if (timeDelay[0] == 0 || timeDelay[1] == 0 || timeDelay[2] == 0 || timeDelay[3] == 0) {
-        // if any value is 0 
+        // if any value is 0
         staticThis->debugMsg(ERROR, "delayCalc(): TimeStamp error.\n");
         return -1; // return max value
     }
@@ -136,9 +136,9 @@ int32_t ICACHE_FLASH_ATTR timeSync::delayCalc() {
 
 
 
-// painlessMesh Syncing functions
+// modularMesh Syncing functions
 //***********************************************************************
-void ICACHE_FLASH_ATTR painlessMesh::startNodeSync(meshConnectionType *conn) {
+void ICACHE_FLASH_ATTR modularMesh::startNodeSync(meshConnectionType *conn) {
 
     debugMsg(SYNC, "startNodeSync(): with %d\n", conn->nodeId);
     String subs = subConnectionJson(conn);
@@ -149,7 +149,7 @@ void ICACHE_FLASH_ATTR painlessMesh::startNodeSync(meshConnectionType *conn) {
 }
 
 //***********************************************************************
-void ICACHE_FLASH_ATTR painlessMesh::handleNodeSync(meshConnectionType *conn, JsonObject& root) {
+void ICACHE_FLASH_ATTR modularMesh::handleNodeSync(meshConnectionType *conn, JsonObject& root) {
     debugMsg(SYNC, "handleNodeSync(): with %d\n", conn->nodeId);
 
     meshPackageType message_type = (meshPackageType)(int)root["type"];
@@ -219,7 +219,7 @@ void ICACHE_FLASH_ATTR painlessMesh::handleNodeSync(meshConnectionType *conn, Js
 }
 
 //***********************************************************************
-void ICACHE_FLASH_ATTR painlessMesh::startTimeSync(meshConnectionType *conn, boolean checkAdopt) {
+void ICACHE_FLASH_ATTR modularMesh::startTimeSync(meshConnectionType *conn, boolean checkAdopt) {
     boolean adopt = true; // default, adopt time
     String timeStamp;
 
@@ -243,7 +243,7 @@ void ICACHE_FLASH_ATTR painlessMesh::startTimeSync(meshConnectionType *conn, boo
 }
 
 //***********************************************************************
-bool ICACHE_FLASH_ATTR painlessMesh::adoptionCalc(meshConnectionType *conn) {
+bool ICACHE_FLASH_ATTR modularMesh::adoptionCalc(meshConnectionType *conn) {
     // make the adoption calulation. Figure out how many nodes I am connected to exclusive of this connection.
 
     uint16_t mySubCount = connectionCount(conn);  //exclude this connection.
@@ -262,7 +262,7 @@ bool ICACHE_FLASH_ATTR painlessMesh::adoptionCalc(meshConnectionType *conn) {
 }
 
 //***********************************************************************
-void ICACHE_FLASH_ATTR painlessMesh::handleTimeSync(meshConnectionType *conn, JsonObject& root, uint32_t receivedAt) {
+void ICACHE_FLASH_ATTR modularMesh::handleTimeSync(meshConnectionType *conn, JsonObject& root, uint32_t receivedAt) {
     String timeStamp = root["msg"];
     debugMsg(S_TIME, "handleTimeSync(): with %d in timestamp=%s\n", conn->nodeId, timeStamp.c_str());
     debugMsg(S_TIME, "handleTimeSync(): local ip: %d.%d.%d.%d, local port = %d\n", IP2STR(conn->esp_conn->proto.tcp->local_ip), conn->esp_conn->proto.tcp->local_port);
@@ -343,7 +343,7 @@ void ICACHE_FLASH_ATTR painlessMesh::handleTimeSync(meshConnectionType *conn, Js
 
 }
 
-void ICACHE_FLASH_ATTR painlessMesh::handleTimeDelay(meshConnectionType *conn, JsonObject& root, uint32_t receivedAt) {
+void ICACHE_FLASH_ATTR modularMesh::handleTimeDelay(meshConnectionType *conn, JsonObject& root, uint32_t receivedAt) {
     String timeStamp = root["msg"];
     uint32_t from = root["from"];
     debugMsg(S_TIME, "handleTimeDelay(): from %u in timestamp = %s\n", from, timeStamp.c_str());
@@ -389,7 +389,3 @@ void ICACHE_FLASH_ATTR painlessMesh::handleTimeDelay(meshConnectionType *conn, J
     debugMsg(S_TIME, "handleTimeSync(): ----------------------------------\n");
 
 }
-
-
-
-
