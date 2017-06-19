@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include <components/GameLogic/GameLogic.h>
+#include <components/MCGameLogic/MCGameLogic.h>
 #include <components/MCMQTT/MCMQTT.h>
 #include <components/MCMesh/MCMesh.h>
 #include <components/MCUDP/MCUDP.h>
@@ -217,7 +217,7 @@ bool MCMesh::parseGameLight(String data) {
   if (lIP == Cube.getDeviceId()) {
     int light = root["light"];
     int t = root["time"].as<int>();
-    GL.switchOnLight(t);
+    MC_GameLogic.switchOnLight(t);
     return true;
   }
   return false;

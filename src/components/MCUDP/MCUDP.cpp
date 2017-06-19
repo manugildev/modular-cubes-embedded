@@ -1,6 +1,6 @@
 
 #include <ArduinoJson.h>
-#include <components/GameLogic/GameLogic.h>
+#include <components/MCGameLogic/MCGameLogic.h>
 #include <components/MCMQTT/MCMQTT.h>
 #include <components/MCMesh/MCMesh.h>
 #include <components/MCUDP/MCUDP.h>

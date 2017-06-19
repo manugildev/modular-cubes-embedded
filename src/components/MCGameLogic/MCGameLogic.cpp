@@ -1,11 +1,11 @@
 #include <ArduinoJson.h>
-#include <components/GameLogic/GameLogic.h>
+#include <components/MCGameLogic/MCGameLogic.h>
 #include <components/MCMesh/MCMesh.h>
 #include <data/ModularCube.h>
 
-void GameLogic::setup() {}
+void MCGameLogic::setup() {}
 
-void GameLogic::loop() {
+void MCGameLogic::loop() {
   if (Cube.isActivated() && millis() > endTime) {
     digitalWrite(2, HIGH);
     Cube.setActivated(false);
@@ -20,7 +20,7 @@ void GameLogic::loop() {
   }
 }
 
-void GameLogic::switchOnLight(int milliseconds) {
+void MCGameLogic::switchOnLight(int milliseconds) { 
   currentMilliseconds = milliseconds;
   Serial.println("  GL -> switchOnLight(" + String(milliseconds) + ")");
   startTime = millis();
@@ -29,7 +29,7 @@ void GameLogic::switchOnLight(int milliseconds) {
   // TODO: Move this to the SetActivate Function?
 }
 
-void GameLogic::switchRandomLightInMesh(int addSeconds) {
+void MCGameLogic::switchRandomLightInMesh(int addSeconds) {
   // This is just to be sure that the light turns off, and that we change.
   // digitalWrite(2, HIGH);
   // Cube.setActivated(false);
@@ -46,7 +46,7 @@ void GameLogic::switchRandomLightInMesh(int addSeconds) {
     }
 }
 
-String GameLogic::createJsonLight(uint32_t randomNode, int addSeconds) {
+String MCGameLogic::createJsonLight(uint32_t randomNode, int addSeconds) {
   DynamicJsonBuffer jsonBuffer;
   JsonArray &array = jsonBuffer.createArray();
   JsonObject &data = jsonBuffer.createObject();
@@ -59,4 +59,4 @@ String GameLogic::createJsonLight(uint32_t randomNode, int addSeconds) {
   return msg;
 }
 
-GameLogic GL;
+MCGameLogic MC_MCGameLogic;

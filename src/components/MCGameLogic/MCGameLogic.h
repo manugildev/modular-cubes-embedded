@@ -1,6 +1,6 @@
 #include <Arduino.h>
 
-class GameLogic {
+class MCGameLogic {
 public:
   void setup();
   void loop();
@@ -16,4 +16,4 @@ private:
   int gameMode = 0;
 };
 
-extern GameLogic GL;
+extern MCGameLogic MC_GameLogic;

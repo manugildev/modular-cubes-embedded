@@ -1,6 +1,6 @@
 #include <data/ModularCube.h>
 
-#include <components/GameLogic/GameLogic.h>
+#include <components/MCGameLogic/MCGameLogic.h>
 #include <components/MCAccelerometer/MCAccelerometer.h>
 #include <components/MCMesh/MCMesh.h>
 #include <components/MCUDP/MCUDP.h>
@@ -32,10 +32,10 @@ void ModularCube::setup() {
   MC_Accelerometer.setup();
   MC_UDP.setup();
 
-  // GL.setup();
+  // MC_GameLogic.setup();
   Serial.println("SetUp for ModularCube done.\n");
   /*if (isMaster())
-    GL.switchOnLight(3000);*/
+    MC_GameLogic.switchOnLight(3000);*/
 }
 
 /****************************************************************************
@@ -47,7 +47,7 @@ void ModularCube::loop() {
   MC_UDP.loop();
 
   MC_Mesh.loop();
-  // GL.loop();
+  // MC_GameLogic.loop();
   if ((millis() - t0) > 200 /*&& isActivated()*/) {
     t0 = millis();
     // This will update only every 100ms
