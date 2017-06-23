@@ -1,15 +1,33 @@
 #include <Arduino.h>
-#include <ESP8266WiFi.h>
+#include <WiFiUdp.h>
 
 class MCAndroid {
 public:
+  enum MessageType {
+    Initial = 0,
+    Connection = 1,
+    Disconnection = 2,
+    Information = 3,
+    Connections = 4
+  };
+  MessageType msgType;
+
   void setup();
   void loop();
-  String getResponse();
-  void sendConnection(String data);
-  void sendDisconnection(String data);
-  void sendInformation(String data);
+  bool startUdpServer();
+  bool receivePacket();
+  bool sendPacket(const IPAddress &address, int messageType, const char *msg,
+                  uint16_t port = 8266);
+  bool parseIncomingPacket(String data);
+  bool parseAndroidPacket(IPAddress ip, uint32_t port, String incomingPacket);
+  bool parseActivate(String response);
+  bool parseGameMode(String gamemode);
+  bool parseAllPackage(String gamemode);
   IPAddress androidIP = IPAddress();
+  uint32_t androidPort = -1;
+  WiFiUDP android;
+
+private:
 };
 
 extern MCAndroid MC_Android;

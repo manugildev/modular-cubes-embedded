@@ -11,8 +11,8 @@
 WiFiUDP udp;
 #define PACKET_MAX_SIZE 255
 const uint16_t localPort = 8266;
-char incomingPacket[PACKET_MAX_SIZE]; // buffer for incoming packets
-char replyPacket[PACKET_MAX_SIZE] = "{\"message\": \"delivered\"}";
+char incomingPackett[PACKET_MAX_SIZE]; // buffer for incoming packets
+char replyPackett[PACKET_MAX_SIZE] = "{\"message\": \"delivered\"}";
 
 void MCUDP::setup() {
   if (!startUdpServer()) {
@@ -62,36 +62,36 @@ bool MCUDP::sendPacket(const IPAddress &address, int messageType,
 }
 
 bool MCUDP::receivePacket() {
-  int len = udp.read(incomingPacket, PACKET_MAX_SIZE);
+  int len = udp.read(incomingPackett, PACKET_MAX_SIZE);
   if (len > 0) {
-    incomingPacket[len] = 0;
+    incomingPackett[len] = 0;
   }
 
-  if (String(incomingPacket).length() != 0) {
+  if (String(incomingPackett).length() != 0) {
     String ip = udp.remoteIP().toString() + ":" + udp.remotePort();
-    Serial.printf("  MCUDP -> New Message: %s, from %s\n", incomingPacket,
+    Serial.printf("  MCUDP -> New Message: %s, from %s\n", incomingPackett,
                   ip.c_str());
-    if (String(incomingPacket).indexOf("android") != -1)
+    if (String(incomingPackett).indexOf("android") != -1)
       Cube.setMaster(true);
 
     if (Cube.isMaster()) {
       // This is for the first message the app sends
-      if (String(incomingPacket).indexOf("android") != -1) {
+      if (String(incomingPackett).indexOf("android") != -1) {
         parseAndroidPacket(udp.remoteIP(), udp.remotePort(),
-                           String(incomingPacket));
+                           String(incomingPackett));
         Serial.println("initial running");
-        Serial.println(incomingPacket);
+        Serial.println(incomingPackett);
         MC_UDP.sendPacket(MC_UDP.androidIP, Initial,
                           Cube.getJsonNoChilds().c_str(), MC_UDP.androidPort);
       } else {
         parseAndroidPacket(udp.remoteIP(), udp.remotePort(),
-                           String(incomingPacket));
+                           String(incomingPackett));
       }
-      // parseJsonChilds(String(incomingPacket));
+      // parseJsonChilds(String(incomingPackett));
     } else {
       // Only if master, for sure
-      // sendPacket(udp.remoteIP(), replyPacket, udp.remotePort());
-      // parseIncomingPacket(String(incomingPacket));
+      // sendPacket(udp.remoteIP(), replyPackett, udp.remotePort());
+      // parseIncomingPacket(String(incomingPackett));
     }
     return true;
   }
@@ -99,20 +99,20 @@ bool MCUDP::receivePacket() {
 }
 
 bool MCUDP::parseAndroidPacket(IPAddress ip, uint32_t port,
-                               String incomingPacket) {
+                               String incomingPackett) {
   androidIP = ip;
   androidPort = port;
-  // Serial.println(incomingPacket);
-  if (incomingPacket.indexOf("lIP") != -1) {
-    parseActivate(incomingPacket);
-  } else if (incomingPacket.indexOf("gamemode") != -1) {
-    parseGameMode(incomingPacket);
-  } else if (incomingPacket.indexOf("connections") != -1) {
+  // Serial.println(incomingPackett);
+  if (incomingPackett.indexOf("lIP") != -1) {
+    parseActivate(incomingPackett);
+  } else if (incomingPackett.indexOf("gamemode") != -1) {
+    parseGameMode(incomingPackett);
+  } else if (incomingPackett.indexOf("connections") != -1) {
     MC_UDP.sendPacket(MC_UDP.androidIP, 4,
                       MC_Mesh.mesh.subConnectionJson().c_str(),
                       MC_UDP.androidPort);
-  } else if (incomingPacket.indexOf("all") != -1) {
-    parseAllPackage(incomingPacket);
+  } else if (incomingPackett.indexOf("all") != -1) {
+    parseAllPackage(incomingPackett);
   }
   return false;
 }
@@ -126,6 +126,11 @@ bool MCUDP::parseAllPackage(String response) {
     Cube.setActivated(false);
     MC_Mesh.publishToAll("stop");
   }
+
+  // Confirmation message to know everyone has received the data
+  MC_UDP.sendPacket(MC_UDP.androidIP, 4,
+                    MC_Mesh.mesh.subConnectionJson().c_str(),
+                    MC_UDP.androidPort);
 }
 
 bool MCUDP::parseActivate(String response) {
@@ -140,10 +145,15 @@ bool MCUDP::parseActivate(String response) {
         MC_Mesh.publish(lIP.toInt(), array[i].as<String>());
       } else {
         int activated = array[i][AC_STRING].as<int>();
+        int response;
+        if (array[i].as<JsonObject>().containsKey(R_STRING))
+          response = array[i][R_STRING].as<int>();
+        else
+          response = 1;
         if (Cube.isActivated()) {
-          Cube.setActivated(false);
+          Cube.setActivated(false, response == 1 ? true : false);
         } else {
-          Cube.setActivated(true);
+          Cube.setActivated(true, response == 1 ? true : false);
         }
       }
     }

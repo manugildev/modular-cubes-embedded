@@ -17,6 +17,7 @@ public:
   void setCurrentOrientation(int currentOrientation);
   void setMaster(bool master);
   void setActivated(bool activated);
+  void setActivated(bool activated, bool resend);
   // Variable Getters
   int getDeviceId();
   String getWlan();

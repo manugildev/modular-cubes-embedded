@@ -1,8 +1,8 @@
 #include <Arduino.h>
+#include <components/MCAndroid/MCAndroid.h>
 #include <components/MCGameLogic/MCGameLogic.h>
 #include <components/MCMQTT/MCMQTT.h>
 #include <components/MCMesh/MCMesh.h>
-#include <components/MCUDP/MCUDP.h>
 #include <components/MCWiFi/MCWiFi.h>
 #include <configuration/Configuration.h>
 #include <data/ModularCube.h>
@@ -12,10 +12,10 @@ modularMesh mesh;
 void MCMesh::setup() {
   t0 = millis();
   // TODO: No need of this
-  setMasterIfMeshDoesNotExist();
+  // setMasterIfMeshDoesNotExist();
   mesh.setDebugMsgTypes(ERROR /*| COMMUNICATION | MESH_STATUS | DEBUG*/);
   mesh.init(MESH_PREFIX, MESH_PASSWORD, MESH_PORT, STA_AP, AUTH_WPA2_PSK, 1,
-            PHY_MODE_11G, 82, !Cube.isMaster(), 4);
+            PHY_MODE_11G, 82, 0, 4);
 
   setUpCallbacks();
   Cube.setDeviceID(mesh.getNodeId());
@@ -33,10 +33,13 @@ void MCMesh::setUpCallbacks() {
   mesh.onNewConnection([&](uint32_t nodeId) {
     Serial.printf("  MCMesh -> New Connection, nodeId = %u\n", nodeId);
     if (Cube.isMaster()) {
-      MC_UDP.sendPacket(MC_UDP.androidIP, 1, String(nodeId).c_str(),
-                        MC_UDP.androidPort);
+      MC_Android.sendPacket(MC_Android.androidIP, 1, String(nodeId).c_str(),
+                            MC_Android.androidPort);
       String msg = "master=" + String(mesh.getNodeId());
       MC_Mesh.publish(nodeId, msg.c_str());
+    } else {
+      //String msg = "master=" + String(masterId);
+      //MC_Mesh.publish(nodeId, msg.c_str());
     }
   });
 
@@ -56,10 +59,13 @@ void MCMesh::setUpCallbacks() {
       // Serial.println(msg);
       if (msg.indexOf("master=") != -1) {
         masterId = from;
+      } else if (msg.indexOf("master?") != -1) {
+        //String msg = "master=" + String(masterId);
+        //MC_Mesh.publish(from, msg.c_str());
       } else if (msg.indexOf("start") != -1) {
-        Cube.setActivated(true);
+        Cube.setActivated(true, false);
       } else if (msg.indexOf("stop") != -1) {
-        Cube.setActivated(false);
+        Cube.setActivated(false, false);
       } else {
         parseIncomingPacket(from, msg);
       }
@@ -110,8 +116,9 @@ void MCMesh::setUpCallbacks() {
           String childString;
           childsObject.printTo(childString);
           Cube.setChilds(childString);
-          MC_UDP.sendPacket(MC_UDP.androidIP, 2, String(textToWrite).c_str(),
-                            MC_UDP.androidPort);
+          MC_Android.sendPacket(MC_Android.androidIP, 2,
+                                String(textToWrite).c_str(),
+                                MC_Android.androidPort);
         }
         // Serial.println(Cube.getJson());
       }
@@ -127,7 +134,7 @@ bool MCMesh::publish(uint32_t destId, String msg) {
 }
 
 bool MCMesh::publishToMaster(String msg) {
-  Serial.println(masterId);
+  // Serial.println(masterId);
   if (masterId == 0) {
     publishToAll("master?");
   } else {
@@ -136,7 +143,7 @@ bool MCMesh::publishToMaster(String msg) {
 }
 
 bool MCMesh::publishToAll(String msg) {
-  Serial.println("PublishToAll: " + msg);
+  Serial.println("  MCMesh -> PublishToAll: " + msg);
   return mesh.sendBroadcast(msg);
 }
 
@@ -189,7 +196,8 @@ bool MCMesh::parseJsonChilds(String data) {
   String childString;
   childsObject.printTo(childString);
   Cube.setChilds(childString);
-  MC_UDP.sendPacket(MC_UDP.androidIP, 3, data.c_str(), MC_UDP.androidPort);
+  MC_Android.sendPacket(MC_Android.androidIP, 3, data.c_str(),
+                        MC_Android.androidPort);
   return true;
 }
 
@@ -228,11 +236,16 @@ bool MCMesh::parseActivate(uint32_t master, String data) {
   JsonObject &root = jsonBuffer.parseObject(data);
   String lIP = root[LI_STRING];
   int activated = root[AC_STRING].as<int>();
+  int response;
+  if (root.containsKey(R_STRING))
+    response = root[R_STRING].as<int>();
+  else
+    response = 1;
   if (lIP.toInt() == Cube.getDeviceId()) {
     if (Cube.isActivated())
-      Cube.setActivated(false);
+      Cube.setActivated(false, response == 1 ? true : false);
     else
-      Cube.setActivated(true);
+      Cube.setActivated(true, response == 1 ? true : false);
   }
   return false;
 }

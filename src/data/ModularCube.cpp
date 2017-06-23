@@ -1,9 +1,9 @@
 #include <data/ModularCube.h>
 
-#include <components/MCGameLogic/MCGameLogic.h>
 #include <components/MCAccelerometer/MCAccelerometer.h>
+#include <components/MCGameLogic/MCGameLogic.h>
 #include <components/MCMesh/MCMesh.h>
-#include <components/MCUDP/MCUDP.h>
+#include <components/MCAndroid/MCAndroid.h>
 #include <configuration/Configuration.h>
 
 /****************************************************************************
@@ -30,7 +30,7 @@ void ModularCube::setup() {
   Serial.println("\nSetting Up ModularCube.");
   MC_Mesh.setup();
   MC_Accelerometer.setup();
-  MC_UDP.setup();
+  MC_Android.setup();
 
   // MC_GameLogic.setup();
   Serial.println("SetUp for ModularCube done.\n");
@@ -44,11 +44,11 @@ void ModularCube::setup() {
 long rNumber = random(3000, 10000);
 void ModularCube::loop() {
   ledLoop();
-  MC_UDP.loop();
+  MC_Android.loop();
 
   MC_Mesh.loop();
   // MC_GameLogic.loop();
-  if ((millis() - t0) > 200 /*&& isActivated()*/) {
+  if ((millis() - t0) > 50 /*&& isActivated()*/) {
     t0 = millis();
     // This will update only every 100ms
     MC_Accelerometer.loop();
@@ -68,8 +68,8 @@ void ModularCube::updateOrientation() {
   if (!Cube.isMaster()) {
     MC_Mesh.publishToMaster(getJson());
   } else {
-    MC_UDP.sendPacket(MC_UDP.androidIP, 3, getJsonNoChilds().c_str(),
-                      MC_UDP.androidPort);
+    MC_Android.sendPacket(MC_Android.androidIP, 3, getJsonNoChilds().c_str(),
+                      MC_Android.androidPort);
   }
 }
 
@@ -96,11 +96,21 @@ void ModularCube::setMaster(bool m) { master = m; }
 void ModularCube::setActivated(bool a) {
   activated = a;
   if (!Cube.isMaster()) {
-    MC_Mesh.publishToAll(getJson());
+    MC_Mesh.publishToMaster(getJson());
   } else {
-    MC_UDP.sendPacket(MC_UDP.androidIP, 3, getJsonNoChilds().c_str(),
-                      MC_UDP.androidPort);
+    MC_Android.sendPacket(MC_Android.androidIP, 3, getJsonNoChilds().c_str(),
+                      MC_Android.androidPort);
   }
+}
+void ModularCube::setActivated(bool a, bool resend) {
+  activated = a;
+  if (resend)
+    if (!Cube.isMaster()) {
+      MC_Mesh.publishToMaster(getJson());
+    } else {
+      MC_Android.sendPacket(MC_Android.androidIP, 3, getJsonNoChilds().c_str(),
+                        MC_Android.androidPort);
+    }
 }
 
 /****************************************************************************
