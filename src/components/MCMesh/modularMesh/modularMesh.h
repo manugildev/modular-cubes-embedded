@@ -20,9 +20,9 @@ extern "C" {
 
 #include "modularMeshSync.h"
 
-#define NODE_TIMEOUT        5000000  //uSecs
+#define NODE_TIMEOUT        6000000  //uSecs
 #define JSON_BUFSIZE        300 // initial size for the DynamicJsonBuffers.
-#define MIN_FREE_MEMORY     10000 // Minimum free memory, besides here all packets in queue are discarded.
+#define MIN_FREE_MEMORY     8000 // Minimum free memory, besides here all packets in queue are discarded.
 #define MAX_MESSAGE_QUEUE   50 // MAX number of unsent messages in queue. Newer messages are discarded
 #define MAX_CONSECUTIVE_SEND 5 // Max message busrt
 

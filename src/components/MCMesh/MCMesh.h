@@ -2,7 +2,7 @@
 
 #include <components/MCMesh/modularMesh/modularMesh.h>
 
-class MCMesh { 
+class MCMesh {
 public:
   int t0;
   uint32_t masterId = 0;

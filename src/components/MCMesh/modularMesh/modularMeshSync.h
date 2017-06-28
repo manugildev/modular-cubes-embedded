@@ -3,11 +3,11 @@
 
 #include <Arduino.h>
 
-#define SCAN_INTERVAL       10000 // AP scan period in ms
+#define SCAN_INTERVAL       6000 // AP scan period in ms
 #define TIME_SYNC_INTERVAL  600000000  // Time resync period, in us. 600 sec = 10 min
-#define SYNC_RESPONSE_TIMEOUT 5000000 // Max time to wait for time response. 5 sec
+#define SYNC_RESPONSE_TIMEOUT 6000000 // Max time to wait for time response. 5 sec
 #define NUMBER_OF_TIMESTAMS 4   // 4 timestamps are needed for time offset calculation
-#define MIN_ACCURACY        10000 // Minimum time sync accuracy
+#define MIN_ACCURACY        30000 // Minimum time sync accuracy
 
 enum timeSyncMessageType_t {
     TIME_SYNC_ERROR = -1,
@@ -30,4 +30,3 @@ public:
 };
 
 #endif //   _MESH_SYNC_H_
-

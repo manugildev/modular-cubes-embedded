@@ -135,8 +135,9 @@ bool MCMesh::publish(uint32_t destId, String msg) {
 
 bool MCMesh::publishToMaster(String msg) {
   // Serial.println(masterId);
-  if (masterId == 0) {
-    publishToAll("master?");
+  if (masterId == 0) /*&& isActivated()*/ {
+    //publishToAll("master?");
+    return false;
   } else {
     return publish(masterId, msg);
   }
